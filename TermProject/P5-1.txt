@@ -1,0 +1,30 @@
+
+Age from 10 to 19
+---------------------------
+
+Age from 20 to 29
+---------------------------
+15 2020-07-12 no Tongbang Choi 26 Cornell University engineer
+22 2020-06-29 no Tongbang Cho 29 Northwestern University marketer
+
+Age from 30 to 39
+---------------------------
+29 2020-06-08 yes Bailey Houghton 31 Gachon University engineer
+2 2020-08-22 no Seungmin Choi 31 Gachon University staff
+18 2020-06-14 no Tongbang Park 32 New York University engineer
+6 2020-06-04 yes Bobby Anderson 33 McGill University engineer
+19 2020-06-07 yes Chunyong Kim 34 Harvard University staff
+10 2020-06-06 yes William Cohen 37 University of Cambridge engineer
+21 2020-07-21 yes Jude Smith 38 Cornell University executive
+16 2020-08-16 yes Tongbang Kim 39 Tsinghua University student
+
+Age from 40 to 49
+---------------------------
+27 2020-08-24 no Konner French 42 Gachon University professor
+28 2020-08-27 no Kwangsu Park 43 University of Pennsylvania student
+30 2020-07-13 yes Kyungmin Choi 44 Duke University student
+9 2020-06-16 yes Kyungmin Kim 45 University of Sydney marketer
+14 2020-08-15 yes Kwangsu Cho 48 Gachon University executive
+5 2020-06-12 yes Chunyong Park 48 University of Cambridge student
+24 2020-07-24 no Stefan Wilkerson 48 University of Melbourne executive
+11 2020-07-22 no Kwangsu Choi 48 Seoul National University marketer
