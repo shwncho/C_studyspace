@@ -18,21 +18,99 @@ struct Person
 	char job[15];
 };
 
+
 struct Node
 {
 	struct Person data;
 	struct Node* next;
 };
-
+void ResetNode(struct Node* node);
+char* GetLastName(struct Person* person);
 int g_count = 0;
 struct Person* g_array = NULL;
 struct Node* g_list = NULL;
+
+void CheckSumArray()
+{
+	char* name;
+	unsigned int checksum=0;
+	unsigned int sum=0;
+	unsigned int arr[10];
+	for (int i = 0; i < MAX_PERSONAL; i++) {
+		name = GetLastName(g_array + i);
+		for (int j = 0; j < strlen(name); j++) {
+			sum += *(name + j);
+		}
+		checksum ^= sum;
+	}
+
+
+}
+
+
+void DisplayList(struct Node* head)
+{
+	struct Node* ptr = head;
+	while (ptr != NULL)
+	{
+		printf("%d %s %s %s %d %s %s\n", ptr->data.tag, ptr->data.dateRegistered, ptr->data.feePaid, ptr->data.name, ptr->data.age, ptr->data.organization, ptr->data.job);
+
+		ptr = ptr->next;
+	}
+	printf("[NULL]\n");
+}
+void PrintList(struct Person* arr, int n) 
+{
+
+	printf("Print Array\n");
+	for (int i = 0; i < n; i++) {
+		printf("%d %s %s %s %d %s %s\n", arr[i].tag, arr[i].dateRegistered, arr[i].feePaid, arr[i].name, arr[i].age, arr[i].organization, arr[i].job);
+
+	}
+
+}
+
+
 
 void ResetPerson(struct Person* person)
 {
 	if (person)
 	{
 		memset(person, 0, sizeof(struct Person));
+	}
+}
+
+void RemoveChoiArray() 
+{
+	const char* name = "Choi";
+	for (int i = 0; i < MAX_PERSONAL; i++) {
+		if (strcmp(name, GetLastName(g_array+i)) == 0) {
+			ResetPerson(g_array+i);
+		}
+	}
+	
+	
+}
+void RemoveChoiList() 
+{
+	const char* name = "Choi";
+	struct Node* node = g_list;
+	while (node)
+	{
+		char* lastName = GetLastName(&(node->data));
+		if (strcmp(lastName, name) == 0)
+		{
+			node->data.tag = 0;
+			strcpy(node->data.dateRegistered, " ");
+			strcpy(node->data.feePaid, " ");
+			strcpy(node->data.name, " ");
+			strcpy(node->data.organization, " ");
+			node->data.age = 0;
+			strcpy(node->data.job, " ");
+		}
+		free(lastName);
+
+		node = node->next;
 	}
 }
 
@@ -361,7 +439,7 @@ void WriteSortedData()
 	int age_range[] = { 10, 20, 30, 40 };
 	for (int i = 0; i < 4; i++)
 	{
-		decompose_by_age(g_array, 30, age_range[i], group_age[i], &group_count[i]);
+		decompose_by_age(g_array, MAX_PERSONAL, age_range[i], group_age[i], &group_count[i]);
 	}
 	for (int i = 0; i < 4; i++) {
 		selection_sort(group_age[i], group_count[i]);
@@ -401,8 +479,9 @@ int main()
 	SetUp(path);
 	//Search();
 	//WriteSortedData();
-
-
+	//RemoveChoiArray();
+	//RemoveChoiList();
+	DisplayList(g_list);
 
 	return 0;
 }
