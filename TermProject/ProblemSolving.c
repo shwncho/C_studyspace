@@ -24,27 +24,57 @@ struct Node
 	struct Person data;
 	struct Node* next;
 };
+
+void copy_personal(const struct Person*, struct Person*);
 void ResetNode(struct Node* node);
 char* GetLastName(struct Person* person);
 int g_count = 0;
 struct Person* g_array = NULL;
 struct Node* g_list = NULL;
+struct Person* c_array =NULL;
+unsigned int CheckSumArray();
 
-void CheckSumArray()
-{
-	char* name;
-	unsigned int checksum=0;
-	unsigned int sum=0;
-	unsigned int arr[10];
-	for (int i = 0; i < MAX_PERSONAL; i++) {
-		name = GetLastName(g_array + i);
-		for (int j = 0; j < strlen(name); j++) {
-			sum += *(name + j);
-		}
-		checksum ^= sum;
+void CheckSumChecking(){
+	for(int i=0; i<MAX_PERSONAL; i++){
+		copy_personal((g_array+i),(c_array+i));
+	}
+
+	if(CheckSumArray(g_array)==CheckSumArray(c_array)){
+		printf("Same checksum");
+	}
+
+	else{
+		printf("Different checksum");
 	}
 
 
+
+
+
+}
+
+unsigned int CheckSumArray(struct Person* c_arr)
+{
+	char* name;
+	unsigned int checksum[MAX_PERSONAL]={0,};
+	unsigned int allchecksum=0;
+	unsigned int sum=0;
+	unsigned int arr[10];
+	for (int i = 0; i < MAX_PERSONAL; i++) {
+		name = GetLastName(c_arr + i);
+		for (int j = 0; j < strlen(name); j++) {
+			sum += *(name + j);
+		}
+		checksum[i] ^= sum;
+	}
+
+	for(int i=0; i<MAX_PERSONAL; i++){
+		allchecksum+=checksum[i];
+	}
+
+	return allchecksum;
+
+	
 }
 
 
@@ -190,7 +220,7 @@ void PrintPerson(struct Person* person)
 	if (!person)
 		return;
 
-	printf("%d %s %s %s %d %s %s\n", person->tag, person->dateRegistered, person->feePaid ? "yes" : "no", person->name, person->age, person->organization, person->job);
+	printf("%d %s %s %s %d %s %s\n", person->tag, person->dateRegistered, person->feePaid, person->name, person->age, person->organization, person->job);
 }
 
 void ResetNode(struct Node* node)
@@ -481,7 +511,7 @@ int main()
 	//WriteSortedData();
 	//RemoveChoiArray();
 	//RemoveChoiList();
-	DisplayList(g_list);
+	CheckSumChecking();
 
 	return 0;
 }
