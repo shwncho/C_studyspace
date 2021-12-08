@@ -190,7 +190,7 @@ void PrintPerson(struct Person* person)
 	if (!person)
 		return;
 
-	printf("%d %s %s %s %d %s %s\n", person->tag, person->dateRegistered, person->feePaid ? "yes" : "no", person->name, person->age, person->organization, person->job);
+	printf("%d %s %s %s %d %s %s\n", person->tag, person->dateRegistered, person->feePaid, person->name, person->age, person->organization, person->job);
 }
 
 void ResetNode(struct Node* node)
