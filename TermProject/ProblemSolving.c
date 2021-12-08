@@ -34,9 +34,11 @@ struct Node* g_list = NULL;
 struct Person* c_array =NULL;
 unsigned int CheckSumArray();
 
-void CheckSumChecking(){
+void CheckSumArrayChecking(){
+	struct Person* c_array = (struct Person*)malloc(sizeof(struct Person) * g_count);
+
 	for(int i=0; i<MAX_PERSONAL; i++){
-		copy_personal((g_array+i),(c_array+i));
+		copy_personal(g_array+i,c_array+i);
 	}
 
 	if(CheckSumArray(g_array)==CheckSumArray(c_array)){
@@ -511,7 +513,9 @@ int main()
 	//WriteSortedData();
 	//RemoveChoiArray();
 	//RemoveChoiList();
-	CheckSumChecking();
+	CheckSumCArrayhecking();
+
+
 
 	return 0;
 }
