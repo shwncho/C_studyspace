@@ -27,4 +27,3 @@ individual contributions signoff – all in a single ZIP file.
 - Never manipulate the result, otherwise you will get ZERO point
 
 
-++testing commit
