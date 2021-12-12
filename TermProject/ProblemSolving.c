@@ -538,7 +538,6 @@ unsigned int CheckSumArray(struct Person* c_arr) {
     unsigned int checksum[MAX_PERSONAL] = { 0, };
     unsigned int allchecksum = 0;
     unsigned int sum = 0;
-    unsigned int arr[10];
 
     for (int i = 0; i < MAX_PERSONAL; i++) {
         name = GetLastName(c_arr + i);
@@ -557,6 +556,55 @@ unsigned int CheckSumArray(struct Person* c_arr) {
     return allchecksum;
 }
 
+unsigned int CheckSumList(struct Node* c_li){
+    char* name;
+    unsigned int checksum[MAX_PERSONAL]={0,};
+    unsigned int allchecksum=0;
+    unsigned int sum =0;
+    
+    
+   for(int i=0; i<MAX_PERSONAL; i++){
+        name = GetLastName(&(c_li->data));
+
+        for(int j=0; j<strlen(name); j++){
+            sum += *(name + j);
+            
+         }
+
+        checksum[i]^=sum;
+        c_li = c_li->next;
+    }
+
+    for(int i=0; i<MAX_PERSONAL; i++){
+        allchecksum+=checksum[i];
+    }
+
+    
+ 
+    return allchecksum;
+  
+}
+
+void CheckSumListChecking() {                                                                  //P8-2
+    struct Node* c_list = g_list;
+
+
+    if (CheckSumList(g_list) == CheckSumList(c_list))
+        printf("Same checksum");
+    else
+        printf("Different checksum");
+}
+
+
+void CompareCheckSum(){                                         // P8-3
+
+    if (CheckSumList(g_list) == CheckSumArray(g_array))
+        printf("Same checksum");
+    else
+        printf("Different checksum");
+    
+}
+
 int main() {
     const char* path = "registraion_data.txt";
     SetUp(path);
@@ -565,7 +613,9 @@ int main() {
     //WriteSortedData();            //P5-1
     //RemoveChoiArray();            //P6-1
     //RemoveChoiList();         //P6-2
-    //CheckSumArrayChecking();  //P8-1, 8-3
+    //CheckSumArrayChecking();  //P8-1
+    //CheckSumListChecking();   //P8-2
+    CompareCheckSum();          //P8-3
 
     return 0;
 }
