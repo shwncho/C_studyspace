@@ -87,20 +87,6 @@ void copy_personal(const struct Person* src, struct Person* dest) {
     strcpy(dest->job, src->job);
 }
 
-char* GetLastName(struct Person* person) {
-    char* name = (char*)malloc(sizeof(person->name) + 1);
-    strncpy(name, person->name, sizeof(person->name));
-    char* firstName = strtok(name, " ");
-    char* lastName = strtok(NULL, " ");
-
-    char* ret = (char*)malloc(strlen(lastName) + 1);
-    strncpy(ret, lastName, strlen(lastName) + 1);
-
-    free(name);
-
-    return ret;
-}
-
 void PrintPerson(struct Person* person) {
     if (!person)
         return;
@@ -218,7 +204,7 @@ void Clear() {
     g_count = 0;
 }
 
-void SearchNameFromArray(const char* text) {                            //P1-1 
+void SearchNameFromArray(const char* text) {                            //P1-1 (작성자 : 윤영균)
     printf("(P1-1 Start)\n");
     for (int i = 0; i < g_count; i++) {
         char* lastName = GetLastName(&g_array[i]);
@@ -231,7 +217,7 @@ void SearchNameFromArray(const char* text) {                            //P1-1
     printf("(P1-1 End)\n\n");
 }
 
-void SearchNameFromList(const char* text) {                             //P1-2
+void SearchNameFromList(const char* text) {                             //P1-2 (작성자 : 윤영균)
     printf("(P1-2 Start)\n");
     struct Node* node = g_list;
     while (node) {
@@ -246,7 +232,7 @@ void SearchNameFromList(const char* text) {                             //P1-2
     printf("(P1-2 End)\n\n");
 }
 
-void SearchOrganizationFromArray(const char* text) {                        //P2-1
+void SearchOrganizationFromArray(const char* text) {                        //P2-1 (작성자 : 윤영균)
     printf("(P2-1 Start)\n");
     for (int i = 0; i < g_count; i++) {
         if (strcmp(g_array[i].organization, text) == 0) {
@@ -256,7 +242,7 @@ void SearchOrganizationFromArray(const char* text) {                        //P2
     printf("(P2-1 End)\n\n");
 }
 
-void SearchOrganizationFromList(const char* text) {                     //P2-2
+void SearchOrganizationFromList(const char* text) {                     //P2-2 (작성자 : 윤영균)
     printf("(P2-2 Start)\n");
     struct Node* node = g_list;
     while (node) {
@@ -277,57 +263,39 @@ void Search() {
     SearchOrganizationFromList("Gachon University");
 }
 
-void changeTag(int* A, int* B) {
-    int temp;
-    temp = *A;
-    *A = *B;
-    *B = temp;
+void changearray(struct Person* dist, struct Person* src) {
+    struct Person* temp = (struct Person*)malloc(sizeof(struct Person));
+
+    temp->tag = src->tag;
+    src->tag = dist->tag;
+    dist->tag = temp->tag;
+
+    strncpy(temp->dateRegistered, src->dateRegistered, sizeof(src->dateRegistered));
+    strncpy(src->dateRegistered, dist->dateRegistered, sizeof(src->dateRegistered));
+    strncpy(dist->dateRegistered, temp->dateRegistered, sizeof(src->dateRegistered));
+
+    strncpy(temp->feePaid, src->feePaid, sizeof(src->feePaid));
+    strncpy(src->feePaid, dist->feePaid, sizeof(src->feePaid));
+    strncpy(dist->feePaid, temp->feePaid, sizeof(src->feePaid));
+
+    strncpy(temp->name, src->name, sizeof(src->name));
+    strncpy(src->name, dist->name, sizeof(src->name));
+    strncpy(dist->name, temp->name, sizeof(src->name));
+
+    strncpy(temp->organization, src->organization, sizeof(src->organization));
+    strncpy(src->organization, dist->organization, sizeof(src->organization));
+    strncpy(dist->organization, temp->organization, sizeof(src->organization));
+
+    temp->age = src->age;
+    src->age = dist->age;
+    dist->age = temp->age;
+
+    strncpy(temp->job, src->job, sizeof(src->job));
+    strncpy(src->job, dist->job, sizeof(src->job));
+    strncpy(dist->job, temp->job, sizeof(src->job));
 }
 
-void changeDate(char* A, char* B) {
-    char* temp = (char*)malloc(sizeof(char*));
-    strncmp(temp, A, sizeof(*A));
-    strncmp(A, B, sizeof(*A));
-    strncmp(B, temp, sizeof(*A));
-}
-
-void changeFeePaid(char* A, char* B) {
-    char* temp = (char*)malloc(sizeof(char*));
-    strncmp(temp, A, sizeof(*A));
-    strncmp(A, B, sizeof(*A));
-    strncmp(B, temp, sizeof(*A));
-}
-
-
-void changeName(char* A, char* B) {
-    char* temp = (char*)malloc(sizeof(char*));
-    strncmp(temp, A, sizeof(*A));
-    strncmp(A, B, sizeof(*A));
-    strncmp(B, temp, sizeof(*A));
-}
-
-void changeOrganization(char* A, char* B) {
-    char* temp = (char*)malloc(sizeof(char*));
-    strncmp(temp, A, sizeof(*A));
-    strncmp(A, B, sizeof(*A));
-    strncmp(B, temp, sizeof(*A));
-}
-
-void changeAge(int* A, int* B) {
-    int temp;
-    temp = *A;
-    *A = *B;
-    *B = temp;
-}
-
-void changeJob(char* A, char* B) {
-    char* temp = (char*)malloc(sizeof(char*));
-    strncmp(temp, A, sizeof(*A));
-    strncmp(A, B, sizeof(*A));
-    strncmp(B, temp, sizeof(*A));
-}
-
-void Sort_By_Tag() {                                                                        //P3-1
+void Sort_By_Tag() {                                                                        //P3-1 (작성자 : 강민준)
     struct Person* temp = (struct Person*)malloc(sizeof(struct Person) * count);
     int i, j;
     copy_array = g_array;
@@ -335,13 +303,7 @@ void Sort_By_Tag() {                                                            
     for (i = 0; i < count; i++) {
         for (j = 0; j < count - 1; j++) {
             if (copy_array[j].tag > copy_array[j + 1].tag) {
-                changeTag(&copy_array[j].tag, &copy_array[j + 1].tag);
-                changeDate(copy_array[j].dateRegistered, copy_array[j + 1].dateRegistered);
-                changeFeePaid(copy_array[j].feePaid, copy_array[j + 1].feePaid);
-                changeName(copy_array[j].name, copy_array[j + 1].name);
-                changeOrganization(copy_array[j].organization, copy_array[j + 1].organization);
-                changeAge(&copy_array[j].age, &copy_array[j + 1].age);
-                changeJob(copy_array[j].job, copy_array[j + 1].job);
+                changearray(&copy_array[j + 1], &copy_array[j]);
             }
         }
     }
@@ -355,7 +317,7 @@ void Sort_By_Tag() {                                                            
     Array_To_LinkedList();
 }
 
-void Array_To_LinkedList() {                                        //P4-1      
+void Array_To_LinkedList() {                                        //P4-1 (작성자 : 강민준)   
     struct Person temp;
     int i;
 
@@ -366,7 +328,7 @@ void Array_To_LinkedList() {                                        //P4-1
     for (int i = 0; i < count; i++)
     {
         copy_personal(copy_array++, &temp);
-        
+
         if (i != 0)
             node = AddNode(node);
 
@@ -384,7 +346,7 @@ void Array_To_LinkedList() {                                        //P4-1
 }
 
 
-void WriteSortedData() {                                                                            //P5-1
+void WriteSortedData() {                                                                            //P5-1 (작성자 : 조석환)
     struct Person group_age[4][MAX_PERSONAL];
     int group_count[4];
     int age_range[] = { 10, 20, 30, 40 };
@@ -410,7 +372,7 @@ void WriteSortedData() {                                                        
         write_Personal_group(pFile, age_range[i], group_age[i], group_count[i]);
     }
 
-    
+
     fclose(pFile);
 }
 
@@ -462,20 +424,40 @@ void write_Personal_group(FILE* pFile, const int age_range, const struct Person 
 
 void DisplayList(struct Node* head) {
     struct Node* ptr = head;
+
+    printf("Print Linkedlist\n");
+    
     while (ptr != NULL) {
         printf("%d %s %s %s %d %s %s\n", ptr->data.tag, ptr->data.dateRegistered, ptr->data.feePaid, ptr->data.name, ptr->data.age, ptr->data.organization, ptr->data.job);
 
         ptr = ptr->next;
     }
-    printf("[NULL]\n");
+
+    printf("[NULL]\n\n");
 }
 
 void PrintList(struct Person* arr, int n) {
     printf("Print Array\n");
+
     for (int i = 0; i < n; i++) {
         printf("%d %s %s %s %d %s %s\n", arr[i].tag, arr[i].dateRegistered, arr[i].feePaid, arr[i].name, arr[i].age, arr[i].organization, arr[i].job);
-
     }
+
+    printf("Print Array End\n\n");
+}
+
+char* GetLastName(struct Person* person) {
+    char* name = (char*)malloc(sizeof(person->name) + 1);
+    strncpy(name, person->name, sizeof(person->name));
+    char* firstName = strtok(name, " ");
+    char* lastName = strtok(NULL, " ");
+
+    char* ret = (char*)malloc(strlen(lastName) + 1);
+    strncpy(ret, lastName, strlen(lastName) + 1);
+
+    free(name);
+
+    return ret;
 }
 
 void ResetPerson(struct Person* person) {
@@ -484,7 +466,7 @@ void ResetPerson(struct Person* person) {
     }
 }
 
-void RemoveChoiArray() {                                            //P6-1
+void RemoveChoiArray() {                                            //P6-1 (작성자 : 조석환)
     const char* name = "Choi";
 
     for (int i = 0; i < MAX_PERSONAL; i++) {
@@ -495,10 +477,10 @@ void RemoveChoiArray() {                                            //P6-1
 
     PrintList(g_array, MAX_PERSONAL);
 }
-void RemoveChoiList() {                                             //P6-2
+void RemoveChoiList() {                                             //P6-2 (작성자 : 조석환)
     const char* name = "Choi";
     struct Node* node = g_list;
-    struct Node* firstnode= g_list;
+    struct Node* firstnode = g_list;
 
     while (node) {
         char* lastName = GetLastName(&(node->data));
@@ -520,7 +502,160 @@ void RemoveChoiList() {                                             //P6-2
     DisplayList(firstnode);
 }
 
-void CheckSumArrayChecking() {                                                                  //P8-1
+void SortArray(struct Person* arr) {
+    int i, j;
+
+    for (i = 0; i < count; i++) {
+        for (j = 0; j < count - 1; j++) {
+            if (arr[j].tag > arr[j + 1].tag) {
+                changearray(&arr[j + 1], &arr[j]);
+            }
+        }
+    }
+}
+
+void AddArray(struct Person* arr, int tag) {
+    int i, j;
+
+    for (i = 0; i < count; i++) {
+        if (arr[i].tag == 0) {
+            g_array[i].tag = tag;
+            strcpy(g_array[i].dateRegistered, "2021-05-05");
+            strcpy(g_array[i].feePaid, "yes");
+            strcpy(g_array[i].name, "Gildong Paik");
+            strcpy(g_array[i].organization, "Gachon University");
+            g_array[i].age = 35;
+            strcpy(g_array[i].job, "student"); 
+            
+            break;
+        }
+    }
+}    
+
+void AddPaikArray() {                                                                       //P7-1 (작성자 : 강민준)
+    int i, j;
+    int flag = 0;
+    int paik_tag = -1;
+
+    SortArray(g_array);
+    
+    for (i = 0; i < count; i++) {
+        for (j = 0; j < count; j++) {
+            if (g_array[j].tag != i + 1)
+                flag++;
+        }
+        if (flag == count) {
+            paik_tag = i + 1;
+            break;
+        }
+        flag = 0;
+    }
+
+    if (paik_tag != -1)
+        AddArray(g_array, paik_tag);
+
+    SortArray(g_array);
+
+    printf("(P7-1 start)\n");
+    for (i = 0; i < count; i++) {
+        PrintPerson(g_array + i);
+    }
+    printf("(P7-1 end)\n\n");
+}
+
+void swapNodedata(struct Node* cur, struct Node* nextcur) {
+    struct Person temp;
+
+    temp = cur->data;
+    cur->data = nextcur->data;
+    nextcur->data = temp;
+}
+
+void SortList(struct Node* list) {
+    struct Node* base, * temp;
+    struct Person data, nextdata;
+    int i, j;
+    base = list;
+
+    for (i = 0; i < count; i++)  {
+        if (base->next == NULL) break;
+
+        for (j = 0; j < count - 1 - i; j++) {
+            data = base->data;
+            nextdata = base->next->data;
+
+            if (data.tag > nextdata.tag) {
+                swapNodedata(base, base->next);
+            }
+            base = base->next;
+        }
+        base = list->next;
+    }
+}
+
+int FindPaikTag(struct Node* list) {
+    int i = 1 , flag = 0, tag = -1;
+    struct Node* base, *temp;
+    struct Person data;
+    base = list;
+    temp = list;
+
+    while (base->next != NULL) {
+        while (temp->next != NULL) {
+            data = temp->data;
+            if (data.tag != i) {
+                flag++;
+            }
+            temp = temp->next;
+        }
+
+        if (flag == count - 1) {
+            tag = i;
+            return tag;
+        }
+        base = base->next;
+        flag = 0;
+        i++;
+    }
+    return tag;
+}
+
+void AddList(struct Node* list, struct Person data) {
+    struct Node* base;
+    struct Person temp, nexttemp;
+    base = list;
+    int i;
+
+    while (base->next != NULL) {
+        temp = base->data;
+        nexttemp = base->next->data;
+    
+        if (temp.tag < nexttemp.tag) {
+            base->data = data;
+            break;
+        }
+        base = base->next;
+    }
+}
+
+void AddPaikList() {                                                                            //P7-2 (작성자 : 강민준)
+    int i, j;
+    struct Person temp = { -1, "2021-05-05", "yes", "Gildong Paik", "Gachon university", 35, "student" };
+
+    SortList(g_list);
+
+    temp.tag = FindPaikTag(g_list);
+
+    AddList(g_list, temp);
+    
+    SortList(g_list);
+
+    printf("(P7-2 start)\n");
+    DisplayList(g_list);
+    printf("(P7-2 end)\n\n");
+}
+
+void CheckSumArrayChecking() {                                                                  //P8-1 (작성자 : 조석환)
     struct Person* c_array = (struct Person*)malloc(sizeof(struct Person) * g_count);
 
     for (int i = 0; i < MAX_PERSONAL; i++) {
@@ -556,38 +691,35 @@ unsigned int CheckSumArray(struct Person* c_arr) {
     return allchecksum;
 }
 
-unsigned int CheckSumList(struct Node* c_li){
+unsigned int CheckSumList(struct Node* c_li) {
     char* name;
-    unsigned int checksum[MAX_PERSONAL]={0,};
-    unsigned int allchecksum=0;
-    unsigned int sum =0;
-    
-    
-   for(int i=0; i<MAX_PERSONAL; i++){
+    unsigned int checksum[MAX_PERSONAL] = { 0, };
+    unsigned int allchecksum = 0;
+    unsigned int sum = 0;
+
+
+    for (int i = 0; i < MAX_PERSONAL; i++) {
         name = GetLastName(&(c_li->data));
 
-        for(int j=0; j<strlen(name); j++){
+        for (int j = 0; j < strlen(name); j++) {
             sum += *(name + j);
-            
-         }
 
-        checksum[i]^=sum;
+        }
+
+        checksum[i] ^= sum;
         c_li = c_li->next;
     }
 
-    for(int i=0; i<MAX_PERSONAL; i++){
-        allchecksum+=checksum[i];
+    for (int i = 0; i < MAX_PERSONAL; i++) {
+        allchecksum += checksum[i];
     }
 
-    
- 
     return allchecksum;
-  
+
 }
 
-void CheckSumListChecking() {                                                                  //P8-2
+void CheckSumListChecking() {                                                                  //P8-2 (작성자 : 조석환)
     struct Node* c_list = g_list;
-
 
     if (CheckSumList(g_list) == CheckSumList(c_list))
         printf("Same checksum");
@@ -595,27 +727,28 @@ void CheckSumListChecking() {                                                   
         printf("Different checksum");
 }
 
-
-void CompareCheckSum(){                                         // P8-3
+void CompareCheckSum() {                                                                       // P8-3 (작성자 : 조석환
 
     if (CheckSumList(g_list) == CheckSumArray(g_array))
         printf("Same checksum");
     else
         printf("Different checksum");
-    
+
 }
 
 int main() {
     const char* path = "registraion_data.txt";
     SetUp(path);
-    //Search();                 //P1-1, P1-2, P2-1, P2-2
+    //Search();                     //P1-1, P1-2, P2-1, P2-2
     //Sort_By_Tag();                //P3-1, P4-1
     //WriteSortedData();            //P5-1
     //RemoveChoiArray();            //P6-1
-    //RemoveChoiList();         //P6-2
+    //RemoveChoiList();             //P6-2
+    //AddPaikArray();               //P7-1
+    //AddPaikList();               //P7-2
     //CheckSumArrayChecking();  //P8-1
     //CheckSumListChecking();   //P8-2
-    CompareCheckSum();          //P8-3
+    //CompareCheckSum();          //P8-3
 
     return 0;
-}
+}           
