@@ -308,11 +308,11 @@ void Sort_By_Tag() {                                                            
         }
     }
 
-    printf("(P3-1 start)\n");
+    printf("(P3-1 Start)\n");
     for (i = 0; i < count; i++) {
         PrintPerson(&copy_array[i]);
     }
-    printf("(P3-1 end)\n\n");
+    printf("(P3-1 End)\n\n");
     free(temp);
     Array_To_LinkedList();
 }
@@ -337,12 +337,12 @@ void Array_To_LinkedList() {                                        //P4-1 (작�
 
     node = head->next;
 
-    printf("(P4-1 start)\n");
+    printf("(P4-1 Start)\n");
     while (node) {
         PrintPerson(&(node->data));
         node = node->next;
     }
-    printf("(P4-1 end)\n\n");
+    printf("(P4-1 End)\n\n");
 }
 
 
@@ -350,6 +350,9 @@ void WriteSortedData() {                                                        
     struct Person group_age[4][MAX_PERSONAL];
     int group_count[4];
     int age_range[] = { 10, 20, 30, 40 };
+
+    printf("(P5-1 Start)\n");
+
 
     for (int i = 0; i < 4; i++) {
         decompose_by_age(g_array, MAX_PERSONAL, age_range[i], group_age[i], &group_count[i]);
@@ -370,8 +373,10 @@ void WriteSortedData() {                                                        
 
     for (int i = 0; i < 4; i++) {
         write_Personal_group(pFile, age_range[i], group_age[i], group_count[i]);
+        printf("'P5-1.txt' file is being written . . . (%d/4)\n", i+1);
     }
 
+    printf("(P5-1 End)\n\n");
 
     fclose(pFile);
 }
@@ -469,18 +474,24 @@ void ResetPerson(struct Person* person) {
 void RemoveChoiArray() {                                            //P6-1 (작성자 : 조석환)
     const char* name = "Choi";
 
+    printf("(P6-1 Start)\n");
+
     for (int i = 0; i < MAX_PERSONAL; i++) {
         if (strcmp(name, GetLastName(g_array + i)) == 0) {
             ResetPerson(g_array + i);
         }
     }
-
+   
     PrintList(g_array, MAX_PERSONAL);
+    
+    printf("(P6-1 End)\n\n");
 }
 void RemoveChoiList() {                                             //P6-2 (작성자 : 조석환)
     const char* name = "Choi";
     struct Node* node = g_list;
     struct Node* firstnode = g_list;
+
+    printf("(P6-2 Start)\n");
 
     while (node) {
         char* lastName = GetLastName(&(node->data));
@@ -500,6 +511,9 @@ void RemoveChoiList() {                                             //P6-2 (작�
     }
 
     DisplayList(firstnode);
+
+
+   printf("(P6-2 End)\n\n");
 }
 
 void SortArray(struct Person* arr) {
@@ -556,11 +570,11 @@ void AddPaikArray() {                                                           
 
     SortArray(g_array);
 
-    printf("(P7-1 start)\n");
+    printf("(P7-1 Start)\n");
     for (i = 0; i < count; i++) {
         PrintPerson(g_array + i);
     }
-    printf("(P7-1 end)\n\n");
+    printf("(P7-1 End)\n\n");
 }
 
 void swapNodedata(struct Node* cur, struct Node* nextcur) {
@@ -650,22 +664,26 @@ void AddPaikList() {                                                            
     
     SortList(g_list);
 
-    printf("(P7-2 start)\n");
+    printf("(P7-2 Start)\n");
     DisplayList(g_list);
-    printf("(P7-2 end)\n\n");
+    printf("(P7-2 End)\n\n");
 }
 
 void CheckSumArrayChecking() {                                                                  //P8-1 (작성자 : 조석환)
     struct Person* c_array = (struct Person*)malloc(sizeof(struct Person) * g_count);
+
+    printf("(P8-1 Start)\n");
 
     for (int i = 0; i < MAX_PERSONAL; i++) {
         copy_personal(g_array + i, c_array + i);
     }
 
     if (CheckSumArray(g_array) == CheckSumArray(c_array))
-        printf("Same checksum");
+        printf("Same checksum\n");
     else
-        printf("Different checksum");
+        printf("Different checksum\n");
+
+        printf("(P8-1 End)\n\n");
 }
 
 unsigned int CheckSumArray(struct Person* c_arr) {
@@ -720,35 +738,47 @@ unsigned int CheckSumList(struct Node* c_li) {
 
 void CheckSumListChecking() {                                                                  //P8-2 (작성자 : 조석환)
     struct Node* c_list = g_list;
+    printf("(P8-2 Start)\n");
 
     if (CheckSumList(g_list) == CheckSumList(c_list))
-        printf("Same checksum");
+        printf("Same checksum\n");
     else
-        printf("Different checksum");
+        printf("Different checksum\n");
+
+    printf("(P8-2 End)\n\n");
 }
 
 void CompareCheckSum() {                                                                       // P8-3 (작성자 : 조석환
 
+    printf("(P8-3 Start)\n");
+
+
     if (CheckSumList(g_list) == CheckSumArray(g_array))
-        printf("Same checksum");
+        printf("Same checksum\n");
     else
-        printf("Different checksum");
+        printf("Different checksum\n");
+
+    printf("(P8-3 End)\n\n");
+
 
 }
 
 int main() {
     const char* path = "registraion_data.txt";
-    SetUp(path);
-    //Search();                     //P1-1, P1-2, P2-1, P2-2
-    //Sort_By_Tag();                //P3-1, P4-1
-    //WriteSortedData();            //P5-1
-    //RemoveChoiArray();            //P6-1
-    //RemoveChoiList();             //P6-2
-    //AddPaikArray();               //P7-1
-    //AddPaikList();               //P7-2
-    //CheckSumArrayChecking();  //P8-1
-    //CheckSumListChecking();   //P8-2
-    //CompareCheckSum();          //P8-3
+    SetUp(path); // 파트1, 파트2, 파트3
 
+    //Search();                     //P1-1, P1-2, P2-1, P2-2 (작성자 : 윤영균) 파트1 시작
+    //Sort_By_Tag();                //P3-1, P4-1 (작성자 : 강민준)
+    //WriteSortedData();            //P5-1 (작성자 : 조석환) 파트1 끝
+
+    //RemoveChoiArray();            //P6-1 (작성자 : 조석환) 파트2 시작
+    //RemoveChoiList();             //P6-2 (작성자 : 조석환)
+    //AddPaikArray();               //P7-1 (작성자 : 강민준)
+    //AddPaikList();               //P7-2 (작성자 : 강민준) 파트2 끝
+
+    //CheckSumArrayChecking();     //P8-1 (작성자 : 조석환) 파트3 시작
+    //CheckSumListChecking();     //P8-2 (작성자 : 조석환)
+    //CompareCheckSum();          //P8-3 (작성자 : 조석환) 파트3 끝
+    
     return 0;
 }           
