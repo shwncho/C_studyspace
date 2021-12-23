@@ -30,23 +30,23 @@ individual contributions signoff – all in a single ZIP file.
 Term Project Specification:
 
 (1) Setup
--** practice file I/O, struct array, basic data structures
--Read a text file provided (conference registrations
+- ** practice file I/O, struct array, basic data structures
+- Read a text file provided (conference registrations
 data).
--Store the data in a struct array.
--Store the data in a linked list.
+- Store the data in a struct array.
+- Store the data in a linked list.
 
 Registration Data
 
-(30 records -- including some “Choi” , and some
+- (30 records -- including some “Choi” , and some
 “Gachon University” in name & organization fields)
--tag# (registration number – unique integer)
--date registered (yyyy-mm-dd)
--fee-paid (“yes” or “no”)
--name (char[25])
--age (integer)
--organization (company or university; char[35])
--job (student, professor, staff, executive, engineer,
+- tag# (registration number – unique integer)
+- date registered (yyyy-mm-dd)
+- fee-paid (“yes” or “no”)
+- name (char[25])
+- age (integer)
+- organization (company or university; char[35])
+- job (student, professor, staff, executive, engineer,
 marketer; char[15])
 
 Term Project Specification:
@@ -68,16 +68,16 @@ persons).
 Term Project Specification:
 
 (2) Update
--All “Choi”s canceled registration. Remove the data from
--the array (fill the memory) (Mark P6-1 in code, Print result P6-1.png)
--the linked list (Mark P6-2 in code, Print result P6-2.png)
--One “Paik” registered late.
--tag#/2021-05-05/yes/Gildong Paik/35/Gachon University/Student.
--Give Paik's tag# in consideration of the tag# of the registere
+- All “Choi”s canceled registration. Remove the data from
+- the array (fill the memory) (Mark P6-1 in code, Print result P6-1.png)
+- the linked list (Mark P6-2 in code, Print result P6-2.png)
+- One “Paik” registered late.
+- tag#/2021-05-05/yes/Gildong Paik/35/Gachon University/Student.
+- Give Paik's tag# in consideration of the tag# of the registere
 d persons. Add the data to
--the array (in the sorted order; shift all affected data)
+- the array (in the sorted order; shift all affected data)
 - (Mark P7-1 in code, Print result P7-1.png)
--the linked list (in the right sorted order)
+- the linked list (in the right sorted order)
 - (Mark P7-2 in code, Print result P7-2.png)
 
 Term Project Specification:
