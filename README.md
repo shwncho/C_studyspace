@@ -28,6 +28,7 @@ individual contributions signoff – all in a single ZIP file.
 
 
 Term Project Specification:
+
 (1) Setup
 -** practice file I/O, struct array, basic data structures
 -Read a text file provided (conference registrations
@@ -36,6 +37,7 @@ data).
 -Store the data in a linked list.
 
 Registration Data
+
 (30 records -- including some “Choi” , and some
 “Gachon University” in name & organization fields)
 -tag# (registration number – unique integer)
@@ -48,6 +50,7 @@ Registration Data
 marketer; char[15])
 
 Term Project Specification:
+
 (2) Search, Reorganize
 - Search for “Choi” (if found, print all information about the persons)
 - in the array (Mark P1-1 in code, Print result P1-1.png)
@@ -63,6 +66,7 @@ persons).
 - Write the sorted data to a text file. (Mark P5-1 in code, submit a text file P5-1.txt)
 
 Term Project Specification:
+
 (2) Update
 -All “Choi”s canceled registration. Remove the data from
 -the array (fill the memory) (Mark P6-1 in code, Print result P6-1.png)
@@ -77,6 +81,7 @@ d persons. Add the data to
 - (Mark P7-2 in code, Print result P7-2.png)
 
 Term Project Specification:
+
 (2) Update
 - Compute the checksum of the Array List – (1)
 - Mark P8-1 in the code and Print result P8-1.png
