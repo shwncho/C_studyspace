@@ -9,61 +9,64 @@
 
 int value = 0;
 double avg=0.0;
-int arr[7];
+int arr[100];
+int n=0; // n is to be entered by user 
 
 int max_value;
 int min_value;
 
-void *runner1(void *param);
-void *runner2(void *param);
-void *runner3(void *param);
+void *avgFunc(void *param); //calculate average
+void *maxFunc(void *param); //search max_value 
+void *minFunc(void *param); //search min_value
 
-int main(int argc, char *argv[])
-{
-pthread_t tid1,tid2,tid3;
-pthread_attr_t attr;
+int main(int argc, char *argv[]){
+	pthread_t tid1,tid2,tid3;
+	pthread_attr_t attr;
     
-    scanf("%d %d %d %d %d %d %d", &arr[0], &arr[1], &arr[2], &arr[3], &arr[4], &arr[5], &arr[6]);
+	printf("Enter the number of values you want to enter: ");
+	scanf("%d",&n);
+	
+	printf("\nEnter %d number:\n", n);
+	for(int i=0; i<n; i++){
+		scanf("%d", &arr[i]);
+	}
 
 	pthread_attr_init(&attr);
-	pthread_create(&tid1,&attr,runner1,NULL);
+	pthread_create(&tid1,&attr,avgFunc,NULL);
 	pthread_join(tid1,NULL);
-	pthread_create(&tid2,&attr,runner2,NULL);
-    pthread_join(tid2,NULL);
-	pthread_create(&tid3,&attr,runner3,NULL);
-    pthread_join(tid3,NULL);
+	pthread_create(&tid2,&attr,maxFunc,NULL);
+    	pthread_join(tid2,NULL);
+	pthread_create(&tid3,&attr,minFunc,NULL);
+    	pthread_join(tid3,NULL);
 
-    printf("The average value is %0.lf\n",avg);
-    printf("The minimum value is %d\n", min_value);
-    printf("The maximum value is %d\n",max_value);
+    	printf("The average value is %0.lf\n",avg);
+    	printf("The minimum value is %d\n", min_value);
+    	printf("The maximum value is %d\n",max_value);
     
 	
 }
 
-void *runner1(void *param){
-    int len = sizeof(arr)/sizeof(int);
+void *avgFunc(void *param){
     int sum=0;
-    for(int i=0; i<len; i++){
+    for(int i=0; i<n; i++){
         sum=sum+arr[i];
     }
-    avg=sum/len;
-	pthread_exit(0);
+    avg=sum/n;
+    pthread_exit(0);
 }
 
-void *runner2(void *param){
-    int len = sizeof(arr)/sizeof(int);
+void *maxFunc(void *param){
     max_value=arr[0];
-    for(int i=0; i<len; i++){
+    for(int i=0; i<n; i++){
         if(arr[i]>max_value)    max_value=arr[i];
     }
     pthread_exit(0);
 
 }
 
-void *runner3(void *param){
-    int len = sizeof(arr)/sizeof(int);
+void *minFunc(void *param){
     min_value=arr[0];
-    for(int i=0; i<len; i++){
+    for(int i=0; i<n; i++){
         if(arr[i]<min_value)    min_value=arr[i];
     }
     pthread_exit(0);
