@@ -14,7 +14,7 @@ tree_ptr insert(tree_ptr head, int number)
 	tree_ptr temp=NULL;
 	tree_ptr insertpoint = NULL;
 
-	/* head 값이 NULL 이면 빈 트리이므로 노드를 만들고 head 값을 반환한다. */
+	/* head 값이 NULL 이면 빈 트리이므로 노드를 만들고 head 값을 반환 */
 	if(! head){ 
         temp = (tree_ptr)malloc(sizeof(node));
 	    temp->data = number;
@@ -25,7 +25,7 @@ tree_ptr insert(tree_ptr head, int number)
 	/* head 값이 NULL 이 아니면 */ 
 	insertpoint = head;	
 	while(insertpoint != NULL){
-	   //printf("%d **", insertpoint->data);
+	   //printf("%d ", insertpoint->data);
 	    if ((insertpoint->data > number) && (insertpoint->left_child != NULL)) insertpoint = insertpoint->left_child;
 	    else if (insertpoint->data == number) return head; 
 	    else if ((insertpoint->data < number) && (insertpoint->right_child != NULL)) insertpoint = insertpoint->right_child;
@@ -75,9 +75,10 @@ int main()
         
    	/* 데이터 31을 찾아본다 */
 	findnode=iter_search(head, 31);
-	if(findnode) printf("find a node : %d \n", findnode->data);
+	if(findnode) printf("(Success) find a node : %d \n", findnode->data);
+	else	printf("searchKey is not in a tree");
 
-	/* bst를 inorder 탐색을 해본다 */
-	printf("* inorder 탐색 \n");
+	/* inorder 탐색을 해본다 */
+	printf("inorder 탐색 \n");
 	inorder(head);
 }	    
