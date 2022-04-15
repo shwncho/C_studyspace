@@ -7,24 +7,19 @@ int front=0;
 int rear=0;
 
 void enqueue(int value){
-    if(front==0 && rear==0){
-        front=(front+1)%MAX_SIZE;
-        rear=(rear+1)%MAX_SIZE;
-    }
-    else{
-        rear=(rear+1)%MAX_SIZE;
-    }
+    
+    rear=(rear+1)%MAX_SIZE;
     arr[rear]=value;
-
 
 }
 
 int dequeue(){
-    return arr[front++];
+    front=(front+1)%MAX_SIZE;
+    return arr[front];
 }
 
 int queue_full(){
-    if(front==rear+1)    return 1;
+    if(front==(rear+1)%MAX_SIZE)    return 1;
     else    return 0;
 }
 
@@ -35,11 +30,9 @@ int queue_empty(){
 
 void print_queue(){
     printf("print queue:");
-    int i=front;
-    do{
+    for(int i=(front+1)%MAX_SIZE; i!=(rear+1)%MAX_SIZE; i=(i+1)%MAX_SIZE){
         printf("%d ",arr[i]);
-        i=(i+1)%MAX_SIZE;
-    }while(i!=rear+1);
+    }
     printf("\n");
 
 }
