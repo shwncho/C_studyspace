@@ -14,6 +14,6 @@ public class P_1 {
         System.out.println("Enter a line of text.");
         String str = sc.nextLine(); // user's input
         System.out.println("I have rephrased that line to read:");
-        System.out.println(str.replace("hate","love"));
+        System.out.println(str.replaceFirst("hate","love"));
     }
 }
