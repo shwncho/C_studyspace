@@ -37,6 +37,7 @@ public class P_4 {
                     }
                 }
             }
+            else if(1<=day && day<=31)  System.out.println("It is a valid date");
         }
         else{
             System.out.println("It is not a valid date");
