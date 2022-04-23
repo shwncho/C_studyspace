@@ -59,8 +59,13 @@ void run_pushed(int arr[], int n){
 
 void run_pops(int n){
     for(int i=0; i<n; i++){
-        int val=pop();
-        printf("pop: %d\n",val);
+	if(stack_empty()!=1){
+        	int val=pop();
+        	printf("pop: %d\n",val);
+    	}
+	else{
+		printf("stack is empty");
+	}
     }
 
 }
