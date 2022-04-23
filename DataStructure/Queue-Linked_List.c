@@ -13,7 +13,6 @@ int num_queue = 0;
 
 int queue_full(){
     if(num_queue == MAX_SIZE){
-        printf("queue is full\n");
         return 1;
     }
     else{
@@ -24,7 +23,6 @@ int queue_full(){
 
 int queue_empty(){
     if(num_queue == 0){
-        printf("queue is empty\n");
         return 1;
     }
     else{
