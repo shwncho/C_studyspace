@@ -1,6 +1,5 @@
 #include<stdio.h>
 #include<stdlib.h>
-#include<time.h>
 
 #define PROCESS_NUM 10
 
@@ -18,6 +17,7 @@ typedef struct PCB{
     int tq; // timequantum
     struct PCB* next;
 }PCB;
+struct PCB list[10];
 
 typedef struct readyQueue{
     struct PCB* head;
@@ -27,28 +27,46 @@ typedef struct readyQueue{
 
 
 int ready_queue_num=0;
+void read_process_list(const char* file_name){
+    int i;
+    int pid, priority, arrival_time,burst_time;
+    FILE* fp;
 
-PCB list[4]={{1,1,1,4,0,-1,0,0},
-            {2,10,2,3,0,-1,0,0},
-            {3,2,2,3,0,-1,0,0},
-            {4,20,4,2,0,-1,0,0}};
+    fp = fopen(file_name, "r");
+    if(fp==NULL){
+        printf("\nFile Could not be opened");
+        return;
+    }
+    else{
+        for(int i=0; i<PROCESS_NUM; i++){
+            fscanf(fp, "%d %d %d %d", &list[i].pid,&list[i].priority,&list[i].arrival_time,&list[i].burst_time);
+            list[i].wt=0;
+            list[i].rt=-1;
+            list[i].tt=0;
+            list[i].tq=0;
+            list[i].next=NULL;
+        }
+    }
+    fclose(fp);
+}
+
 
 // job queue에 프로세스들 넣기
-PCBpointer jobQueue[4];
+PCBpointer jobQueue[PROCESS_NUM];
 
 PCBpointer runningProcess=NULL;
 PCBpointer prevRunningProcess=NULL;
 
 void init_job_queue(){
     int i;
-    for(i=0; i<4; i++){
+    for(i=0; i<PROCESS_NUM; i++){
         jobQueue[i]=NULL;
     }
 }
 
 void insert_job_queue(){
     
-    for(int i=0; i<4; i++){
+    for(int i=0; i<PROCESS_NUM; i++){
         jobQueue[i]=(PCBpointer)malloc(sizeof(struct PCB));
         jobQueue[i]->pid=list[i].pid;
         jobQueue[i]->priority=list[i].priority;
@@ -82,10 +100,10 @@ void sortByat(int n){
 }
 
 //각 알고리즘마다 ready queue에서의 활동이 달라지므로 이것을 jobqueue에서 부터 보장해주기 위해 clone을 이용
-PCBpointer cloneJobQueue[4];
+PCBpointer cloneJobQueue[PROCESS_NUM];
 int clone_job_queue_num=0;
 void insert_clone_job_queue(){
-    for(int i=0; i<4; i++){
+    for(int i=0; i<PROCESS_NUM; i++){
         cloneJobQueue[i]=(PCBpointer)malloc(sizeof(struct PCB));
         cloneJobQueue[i]->pid=jobQueue[i]->pid;
         cloneJobQueue[i]->priority=jobQueue[i]->priority;
@@ -126,7 +144,8 @@ void FCFS(){
             // ready queue num이 0이 아니면 새로운 process를 PCB의 next로 추가, tail에도 추가 
             //job queue num --, ready queue num ++
 
-
+        //Defense infinite loop 
+        if(time>=100)   break;
         //도착시간이 같은 프로세스가 있을 수 있으므로 while문
         while(cloneJobQueue[i]->arrival_time==time){
             printf("<time %d> [new arrival] process %d\n",time,cloneJobQueue[i]->pid);
@@ -136,8 +155,7 @@ void FCFS(){
                 rq.tail=cloneJobQueue[i];
             }
             else{
-                // cloneJobQueue[i-1]->next=cloneJobQueue[i];
-                // rq.tail=cloneJobQueue[i];
+                
                 rq.tail->next=cloneJobQueue[i];
                 rq.tail=cloneJobQueue[i];
             }
@@ -225,16 +243,16 @@ void FCFS(){
     printf("<time %d> all processes finish\n",time);
     printf("=================================================\n");
 
-    for(int j=0; j<4; j++){
+    for(int j=0; j<PROCESS_NUM; j++){
         sumwt+=cloneJobQueue[j]->wt;
         sumrt+=cloneJobQueue[j]->rt;
         sumtt+=cloneJobQueue[j]->tt + cloneJobQueue[j]->wt; //tt는 running state일 때만 더해줬으므로 ready queue에 있을 때도 지금 더해줌
     }
 
 
-    avgwt=(float)sumwt/4;
-    avgrt=(float)sumrt/4;
-    avgtt=(float)sumtt/4;
+    avgwt=(float)sumwt/PROCESS_NUM;
+    avgrt=(float)sumrt/PROCESS_NUM;
+    avgtt=(float)sumtt/PROCESS_NUM;
 
 
     printf("Average cpu usage : %.2lf%%\n",((time-idle)/(float)time)*100);
@@ -268,7 +286,7 @@ void RR(int timequantum){
     PCBpointer runningProcess=NULL;
     PCBpointer prevRunningProcess=NULL;
 
-    printf("Scheduling : RR\n");
+    printf("\nScheduling : RR\n");
     printf("=================================================\n");
 
     while(!(clone_job_queue_num==0 && ready_queue_num==0 && runningProcess==NULL)){
@@ -276,8 +294,11 @@ void RR(int timequantum){
             //ready queue num이 0이면 PCB를 readyQueue의 head,tail로 연결
             // ready queue num이 0이 아니면 새로운 process를 PCB의 next로 추가, tail에도 추가 
             //job queue num --, ready queue num ++
-
+        
+        //Defense infinite loop
         if(time>=100)    break;
+
+        // 출력해서 보기위한
         // if(time>=20){
         //     printf("rq.tail->pid%d\n",rq.tail->pid);
         //     printf("ready_queue num%d\n",ready_queue_num);
@@ -474,16 +495,16 @@ void RR(int timequantum){
 
 
 
-    for(int j=0; j<4; j++){
+    for(int j=0; j<PROCESS_NUM; j++){
         sumwt+=cloneJobQueue[j]->wt;
         sumrt+=cloneJobQueue[j]->rt;
         sumtt+=cloneJobQueue[j]->tt + cloneJobQueue[j]->wt; //tt는 running state일 때만 더해줬으므로 ready queue에 있을 때도 지금 더해줌
     }
 
 
-    avgwt=(float)sumwt/4;
-    avgrt=(float)sumrt/4;
-    avgtt=(float)sumtt/4;
+    avgwt=(float)sumwt/PROCESS_NUM;
+    avgrt=(float)sumrt/PROCESS_NUM;
+    avgtt=(float)sumtt/PROCESS_NUM;
 
 
     printf("Average cpu usage : %.2lf%%\n",((time-idle)/(float)time)*100);
@@ -497,12 +518,19 @@ void RR(int timequantum){
 void Priority(float alpha){
     //우선순위 같을경우 도착시간 먼저온애 부터
     //도착시간 같을경우 burst time 짧은애 먼저
+
+    //프로세스 도착할 때마다 priority 비교, 다르면 재정렬
+
+    //도착한 프로세스 없으면 aging에 의한 priority 비교
+
+    //정렬할려 할 때 레디큐의 head가 null인지 체크
+    
 }
 
 //알고리즘 수행 뒤 clone_job_queue는 초기화, ready queue는 비우기, runningProcess도 free 해주기
 
 void clear_clone_job_queue(){
-    for(int i=0; i<4; i++){
+    for(int i=0; i<PROCESS_NUM; i++){
         free(cloneJobQueue[i]);
         cloneJobQueue[i]=NULL;
     }
@@ -516,13 +544,15 @@ void clear_job_queue(){
 }
 int main(int argc, char *argv[]){
 
+    read_process_list("input1.dat");
     insert_job_queue();
-    sortByat(4);
+    sortByat(PROCESS_NUM);
     insert_clone_job_queue();
     FCFS();
 
     clear_clone_job_queue();
     insert_clone_job_queue();
+
 
     RR(3);
     
