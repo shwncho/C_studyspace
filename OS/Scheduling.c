@@ -24,6 +24,7 @@ typedef struct readyQueue{
     struct PCB* tail;
 }readyQueue;
 
+readyQueue rq;
 
 
 int ready_queue_num=0;
@@ -117,6 +118,21 @@ void insert_clone_job_queue(){
         clone_job_queue_num++;
     }
 }
+int time=0;
+void clear_time(){
+    time=0;
+}
+
+void add_waiting_time(){
+    PCBpointer ptr=NULL;
+    if(rq.head!=NULL){
+        ptr=rq.head;
+        while(ptr!=NULL){
+            ptr->wt++;
+            ptr=ptr->next;
+        }
+    }
+}
 
 
 void FCFS(){
@@ -127,11 +143,10 @@ void FCFS(){
     int sumwt=0,sumrt=0,sumtt=0;
     int idle=0;
 
-    int time=0;
     int i=0; //index
 
-    readyQueue rq;
     rq.head=rq.tail=NULL;
+
     PCBpointer t=NULL;
     PCBpointer ptr=NULL;
 
@@ -178,11 +193,16 @@ void FCFS(){
                 if(runningProcess->rt==-1)   runningProcess->rt=runningProcess->wt;
                 if(prevRunningProcess==NULL)    prevRunningProcess=runningProcess;
             
-                t=rq.head;
-                rq.head=t->next;
-                t->next=NULL;
+                if(rq.head->next!=NULL){
+                    t=rq.head;
+                    rq.head=t->next;
+                    t->next=NULL;
+                }
+                else{
+                    rq.head=NULL;
+                    rq.tail=NULL;
+                }
 
-                //rq.head=rq.head->next;
 
                 if((prevRunningProcess!=NULL && runningProcess!=NULL)){
                     if(prevRunningProcess!=runningProcess){
@@ -196,10 +216,6 @@ void FCFS(){
                 runningProcess->burst_time--;
                 runningProcess->tt++;   //여기에서 tt는 running state일 때의 시간
 
-                //burst time이 1인 process가 있을 수 있으므로
-                if(runningProcess->burst_time==0){
-                    runningProcess=NULL;
-                }
 
                 
             }
@@ -207,7 +223,8 @@ void FCFS(){
                 printf("<time %d> ---- system is idle ----\n",time);
                 idle++;
 
-                prevRunningProcess=NULL;
+                if(rq.head==NULL)    prevRunningProcess=NULL;
+                
             }
 
             
@@ -223,20 +240,14 @@ void FCFS(){
             runningProcess->burst_time--;
             runningProcess->tt++;   //여기에서 tt는 running state일 때의 시간
             
-            if(runningProcess->burst_time==0){
-                runningProcess=NULL;
-            }
+            
         }
 
-        //readyQueue에(프로세스가 있다면) 있는 프로세스들 watingTime++
-        if(rq.head!=NULL){
-            ptr=rq.head;
-            while(ptr!=NULL){
-                ptr->wt++;
-                ptr=ptr->next;
-            }
+    
+        if(runningProcess->burst_time==0){
+            runningProcess=NULL;
         }
-
+        add_waiting_time();
         //time++
         time++;
     }
@@ -263,9 +274,41 @@ void FCFS(){
 
 
 }
+void RR_timequantum(int timequantum){
+    PCBpointer t2=NULL; //PCBpointer를 받기위한 임시 저장소2
+
+
+    if(runningProcess!=NULL){
+        if(runningProcess->tq>=timequantum && runningProcess->tq%timequantum==0){
+            if(rq.head!=NULL){
+                rq.tail->next=runningProcess;
+                rq.tail=runningProcess;
+
+                prevRunningProcess=runningProcess;
+
+                runningProcess=rq.head;
+                    
+                //running process로 넘어간 process의 next를 초기화
+                t2=rq.head;
+                rq.head=t2->next;
+                t2->next=NULL;                   
+            }
+
+            if((prevRunningProcess!=NULL && runningProcess!=NULL)){
+                if(prevRunningProcess!=runningProcess){
+                    printf("------------------------------------ 2(Context-Switch)\n");
+                }
+            }
+
+                //ready queue에 아무것도 없을경우 계속 running
+
+                
+        }        
+    }
+
+}
 //Round Robin
-//가정: 프로세스가 도착하자마자 running 할 수 없다
-void RR(int timequantum){
+void RR_simulator(int timequantum){
     float avgwt=0.0;
     float avgrt=0.0;
     float avgtt=0.0;
@@ -273,18 +316,15 @@ void RR(int timequantum){
     int sumwt=0,sumrt=0,sumtt=0;
     int idle=0;
 
-    int time=0;
     int i=0; //index
 
-    ready_queue_num=0;
 
-    readyQueue rq;
     rq.head=rq.tail=NULL;
     PCBpointer t=NULL;  //PCBpointer를 받기위한 임시 저장소
-    PCBpointer t2=NULL; //PCBpointer를 받기위한 임시 저장소2
-    PCBpointer ptr=NULL; //readyQueue의 wating time을 증가시키는데 사용되는 포인터
-    PCBpointer runningProcess=NULL;
-    PCBpointer prevRunningProcess=NULL;
+    
+    
+    //context switch를 비교하기위한 변수
+    prevRunningProcess=NULL;
 
     printf("\nScheduling : RR\n");
     printf("=================================================\n");
@@ -297,12 +337,6 @@ void RR(int timequantum){
         
         //Defense infinite loop
         if(time>=100)    break;
-
-        // 출력해서 보기위한
-        // if(time>=20){
-        //     printf("rq.tail->pid%d\n",rq.tail->pid);
-        //     printf("ready_queue num%d\n",ready_queue_num);
-        // }
 
         //도착시간이 같은 프로세스가 있을 수 있으므로 while문
         while(cloneJobQueue[i]->arrival_time==time){
@@ -322,8 +356,9 @@ void RR(int timequantum){
             ready_queue_num++;
         }
 
-        
-
+        //jobQueue에 있던 프로세스들이 모두 빠져나간뒤에도 timequantum 비교
+        RR_timequantum(timequantum);
+                
         //runningProcess없다면 그리고 ready queue에 프로세스 있다면
             //->ready queue에 있는거 running으로 보내주기
             //running으로 가는 프로세스의 next를 ready queue의 head로 보내주고 next=null
@@ -336,12 +371,19 @@ void RR(int timequantum){
             if(rq.head!=NULL){
                 runningProcess=rq.head;
                 if(runningProcess->rt==-1)   runningProcess->rt=runningProcess->wt;
-                if(prevRunningProcess==NULL)    prevRunningProcess=runningProcess;
-            
-                t=rq.head;
-                rq.head=t->next;
-                t->next=NULL;
+                //runningProcess가 NULL인데 prevRunningProcess도 NULL이라는 뜻은 runningProcess가 처음 들어온 시점이라는 의미
+                if(prevRunningProcess==NULL)    prevRunningProcess=runningProcess; 
 
+            
+                if(rq.head->next!=NULL){
+                    t=rq.head;
+                    rq.head=t->next;
+                    t->next=NULL;
+                }
+                else{
+                    rq.head=NULL;
+                    rq.tail=NULL;
+                }
 
                 if((prevRunningProcess!=NULL && runningProcess!=NULL)){
                     if(prevRunningProcess!=runningProcess){
@@ -355,49 +397,17 @@ void RR(int timequantum){
                 runningProcess->burst_time--;
                 runningProcess->tt++;   //여기에서 tt는 running state일 때의 시간
                 
-                if(runningProcess->burst_time==0){
-                    runningProcess=NULL;
-                }
-
-                //running process의 burst time이 아직 남아있을 때
-                else{
-                    runningProcess->tq++;
-                    //runningProcess에서 timeQuantum시간이 다 됐을경우
-                    if(runningProcess->tq%timequantum==0){
-                        if(rq.head!=NULL){
+            
+                runningProcess->tq++;
                     
-                            runningProcess->tq=0;
-
-                            rq.tail->next=runningProcess;
-                            rq.tail=runningProcess;
-
-                            prevRunningProcess=runningProcess;
-
-                            runningProcess=rq.head;
-
-                            //running process로 넘어간 process의 next를 초기화
-                            t2=rq.head;
-                            rq.head=t2->next;
-                            t2->next=NULL;
-
-                    
-                        printf("------------------------------------  2(Context-Switch)\n");
-
-                        }
-
-                        //ready queue에 아무것도 없을경우 계속 running
-
-                
-                    }
-                }
-
                 
             }
             else{
                 printf("<time %d> ---- system is idle ----\n",time);
                 idle++;
 
-                prevRunningProcess=NULL;
+                //runningProcess가 없고, rq.head도 없는상태이므로 prevRunningProcess도 null로 초기화
+                if(rq.head==NULL)    prevRunningProcess=NULL;
             }
 
             
@@ -411,81 +421,23 @@ void RR(int timequantum){
         else if(runningProcess!=NULL){
            
             runningProcess->tq++;
-            //runningProcess에서 timeQuantum시간이 다 됐을경우
-
-            if(runningProcess->tq%timequantum==0){
-                if(rq.head!=NULL){
-                    printf("<time %d> process %d is running\n",time,runningProcess->pid);    
-                    time++;
-                    runningProcess->burst_time--;
-                    runningProcess->tt++;   //여기에서 tt는 running state일 때의 시간
-
             
-                    if(runningProcess->burst_time==0){
-                        runningProcess=NULL;
-                        //readyQueue에(프로세스가 있다면) 있는 프로세스들 watingTime++
-                        if(rq.head!=NULL){
-                            ptr=rq.head;
-                            while(ptr!=NULL){
-                                ptr->wt++;
-                                ptr=ptr->next;
-                            }
-                        }
-                        //runningProcess의 burstTime이 끝나면 readyqueue조정을 안해도된다.                
-                        continue;
-                    }
-                    printf("------------------------------------  tq(Context-Switch)\n");
-
-                    //readyQueue에(프로세스가 있다면) 있는 프로세스들 watingTime++
-                    if(rq.head!=NULL){
-                        ptr=rq.head;
-                        while(ptr!=NULL){
-                            ptr->wt++;
-                            ptr=ptr->next;
-                        }
-                    }                
-                    runningProcess->tq=0;
-
-                    rq.tail->next=runningProcess;
-                    rq.tail=runningProcess;
-
-                    prevRunningProcess=runningProcess;
-
-                    runningProcess=rq.head;
-                    
-                    //running process로 넘어간 process의 next를 초기화
-                    t2=rq.head;
-                    rq.head=t2->next;
-                    t2->next=NULL;
-                   
-                    continue;
-                   
-                }
-
-                //ready queue에 아무것도 없을경우 계속 running
-
-                
-            }
             printf("<time %d> process %d is running\n",time,runningProcess->pid);
             runningProcess->burst_time--;
             runningProcess->tt++;   //여기에서 tt는 running state일 때의 시간
 
             
-            if(runningProcess->burst_time==0){
-                runningProcess=NULL;
-            }
+            
 
             
         }
 
-        //readyQueue에(프로세스가 있다면) 있는 프로세스들 watingTime++
-        if(rq.head!=NULL){
-            ptr=rq.head;
-            while(ptr!=NULL){
-                ptr->wt++;
-                ptr=ptr->next;
-            }
+        if(runningProcess->burst_time==0){
+            runningProcess=NULL;
         }
+
+        //readyQueue에(프로세스가 있다면) 있는 프로세스들 watingTime++
+        add_waiting_time();
 
         //time++
         time++;
@@ -515,7 +467,8 @@ void RR(int timequantum){
 
 }
 
-void Priority(float alpha){
+void Priority_algorithm(){}
+void Priority_simulator(float alpha){
     //우선순위 같을경우 도착시간 먼저온애 부터
     //도착시간 같을경우 burst time 짧은애 먼저
 
@@ -554,16 +507,20 @@ int main(int argc, char *argv[]){
     insert_clone_job_queue();
 
 
-    RR(3);
+    clear_time();
+    RR_simulator(2);
+
+    clear_clone_job_queue();
+    insert_clone_job_queue();
+
+
+    clear_time();
+
     
-    
-
-
-
-
 
 
     //모든 알고리즘 끝낸 뒤
+    //list free
     //job_queue free
     //ready queue free
     //running process도 free
