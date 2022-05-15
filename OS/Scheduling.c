@@ -24,23 +24,65 @@ typedef struct readyQueue{
     struct PCB* tail;
 }readyQueue;
 
+FILE *inFile, *outFile;
+
 readyQueue rq;
+PCBpointer jobQueue[PROCESS_NUM];
+PCBpointer runningProcess=NULL;
+PCBpointer prevRunningProcess=NULL;
+PCBpointer cloneJobQueue[PROCESS_NUM];
 
 
 int ready_queue_num=0;
+int clone_job_queue_num=0;
+int time=0;
+
+void read_process_list(const char* file_name);
+void init_job_queue();
+void insert_job_queue();
+void sortByat(int n);
+void insert_clone_job_queue();
+
+void clear_time();
+
+void add_waiting_time();
+
+void FCFS();
+
+void RR_timequantum(int timequantum);
+
+void RR_simulator(int timequantum);
+
+void apply_aging(float alpha);
+
+void insert_by_priority(PCBpointer newProcess);
+
+void swap_PCB (PCBpointer a, PCBpointer b);
+
+void sort_ready_queue();
+
+void Priority_algorithm(float alpha);
+
+void Priority_simulator(float alpha);
+
+void clear_clone_job_queue();
+
+void clear_job_queue();
+
+
+
 void read_process_list(const char* file_name){
     int i;
     int pid, priority, arrival_time,burst_time;
-    FILE* fp;
 
-    fp = fopen(file_name, "r");
-    if(fp==NULL){
+    inFile = fopen(file_name, "r");
+    if(inFile==NULL){
         printf("\nFile Could not be opened");
         return;
     }
     else{
         for(int i=0; i<PROCESS_NUM; i++){
-            fscanf(fp, "%d %d %d %d", &list[i].pid, &list[i].priority, &list[i].arrival_time, &list[i].burst_time);
+            fscanf(inFile, "%d %d %d %d", &list[i].pid, &list[i].priority, &list[i].arrival_time, &list[i].burst_time);
             list[i].wt=0;
             list[i].rt=-1;
             list[i].tt=0;
@@ -48,15 +90,9 @@ void read_process_list(const char* file_name){
             list[i].next=NULL;
         }
     }
-    fclose(fp);
+    fclose(inFile);
 }
 
-
-// job queue에 프로세스들 넣기
-PCBpointer jobQueue[PROCESS_NUM];
-
-PCBpointer runningProcess=NULL;
-PCBpointer prevRunningProcess=NULL;
 
 void init_job_queue(){
     int i;
@@ -101,8 +137,6 @@ void sortByat(int n){
 }
 
 //각 알고리즘마다 ready queue에서의 활동이 달라지므로 이것을 jobqueue에서 부터 보장해주기 위해 clone을 이용
-PCBpointer cloneJobQueue[PROCESS_NUM];
-int clone_job_queue_num=0;
 void insert_clone_job_queue(){
     for(int i=0; i<PROCESS_NUM; i++){
         cloneJobQueue[i]=(PCBpointer)malloc(sizeof(struct PCB));
@@ -119,7 +153,6 @@ void insert_clone_job_queue(){
     }
 }
 
-int time=0;
 void clear_time(){
     time=0;
 }
@@ -135,7 +168,6 @@ void add_waiting_time(){
     }
 }
 
-
 void FCFS(){
     float avgwt=0.0;
     float avgrt=0.0;
@@ -146,6 +178,8 @@ void FCFS(){
 
     int i=0; //index
 
+    outFile = fopen("output1.txt","w");
+
     rq.head=rq.tail=NULL;
 
     PCBpointer ptr=NULL;
@@ -153,17 +187,19 @@ void FCFS(){
     printf("Scheduling : FCFS\n");
     printf("=================================================\n");
 
+    fprintf(outFile,"Scheduling : FCFS\n");
+    fprintf(outFile,"=================================================\n");
+
     while(!(clone_job_queue_num==0 && ready_queue_num==0 && runningProcess==NULL)){
         //job queue에서 arriveTime이 time과 일치하면 readyQueue로 넣어주기
             //ready queue num이 0이면 PCB를 readyQueue의 head,tail로 연결
             // ready queue num이 0이 아니면 새로운 process를 PCB의 next로 추가, tail에도 추가 
             //job queue num --, ready queue num ++
 
-        //Defense infinite loop 
-        if(time>=100)   break;
         //도착시간이 같은 프로세스가 있을 수 있으므로 while문
         while(i<PROCESS_NUM && cloneJobQueue[i]->arrival_time==time){
             printf("<time %d> [new arrival] process %d\n",time,cloneJobQueue[i]->pid);
+            fprintf(outFile,"<time %d> [new arrival] process %d\n",time,cloneJobQueue[i]->pid);
             
             if(ready_queue_num==0){
                 rq.head=cloneJobQueue[i];
@@ -182,7 +218,7 @@ void FCFS(){
         //runningProcess없다면 그리고 ready queue에 프로세스 있다면
             //->ready queue에 있는거 running으로 보내주기
             //running으로 가는 프로세스의 next를 ready queue의 head로 보내주고 next=null
-            //ready queue num -- , new arrival 출력, process is running 출력
+            //ready queue num -- process is running 출력
             //burstTime --, turnaroundtime++
             //넣어줄게 없으면 system is idle 출력, idle++
         
@@ -205,10 +241,12 @@ void FCFS(){
                 if((prevRunningProcess!=NULL && runningProcess!=NULL)){
                     if(prevRunningProcess!=runningProcess){
                         printf("------------------------------------  (Context-Switch)\n");
+                        fprintf(outFile,"------------------------------------  (Context-Switch)\n");
                     }
                 }
 
                 printf("<time %d> process %d is running\n",time,runningProcess->pid);
+                fprintf(outFile,"<time %d> process %d is running\n",time,runningProcess->pid);
                 
                 ready_queue_num--;
                 runningProcess->burst_time--;
@@ -216,6 +254,7 @@ void FCFS(){
 
                 if(runningProcess->burst_time==0){
                     printf("<time %d> process %d is finished\n",time,runningProcess->pid);
+                    fprintf(outFile,"<time %d> process %d is finished\n",time,runningProcess->pid);
                     runningProcess=NULL;
                 }
 
@@ -224,6 +263,7 @@ void FCFS(){
             }
             else{
                 printf("<time %d> ---- system is idle ----\n",time);
+                fprintf(outFile,"<time %d> ---- system is idle ----\n",time);
                 idle++;
 
                 if(rq.head==NULL)    prevRunningProcess=NULL;
@@ -240,11 +280,13 @@ void FCFS(){
 
         else if(runningProcess!=NULL){
             printf("<time %d> process %d is running\n",time,runningProcess->pid);
+            fprintf(outFile,"<time %d> process %d is running\n",time,runningProcess->pid);
             runningProcess->burst_time--;
             runningProcess->tt++;   //여기에서 tt는 running state일 때의 시간
             
             if(runningProcess->burst_time==0){
-                printf("<time %d> process %d is finished\n",time,runningProcess->pid);    
+                printf("<time %d> process %d is finished\n",time,runningProcess->pid);
+                fprintf(outFile,"<time %d> process %d is finished\n",time,runningProcess->pid);    
                 runningProcess=NULL;
             }
         }
@@ -256,6 +298,9 @@ void FCFS(){
     }
     printf("<time %d> all processes finish\n",time);
     printf("=================================================\n");
+    fprintf(outFile,"<time %d> all processes finish\n",time);
+    fprintf(outFile,"=================================================\n");
+
 
     for(int j=0; j<PROCESS_NUM; j++){
         sumwt+=cloneJobQueue[j]->wt;
@@ -274,7 +319,10 @@ void FCFS(){
     printf("Average response time : %.1f\n",avgrt);
     printf("Average turnaround time : %.1f\n",avgtt);
 
-
+    fprintf(outFile,"Average cpu usage : %.2f%%\n",((time-idle)/(float)time)*100);
+    fprintf(outFile,"Average waiting time : %.1f\n",avgwt);
+    fprintf(outFile,"Average response time : %.1f\n",avgrt);
+    fprintf(outFile,"Average turnaround time : %.1f\n",avgtt);
 
 }
 void RR_timequantum(int timequantum){
@@ -308,7 +356,6 @@ void RR_simulator(int timequantum){
 
     int i=0; //index
 
-
     rq.head=rq.tail=NULL;
     
     
@@ -318,25 +365,26 @@ void RR_simulator(int timequantum){
     printf("\nScheduling : RR\n");
     printf("=================================================\n");
 
+    fprintf(outFile,"\nScheduling : RR\n");
+    fprintf(outFile,"=================================================\n");
+
     while(!(clone_job_queue_num==0 && ready_queue_num==0 && runningProcess==NULL)){
         //job queue에서 arriveTime이 time과 일치하면 readyQueue로 넣어주기
             //ready queue num이 0이면 PCB를 readyQueue의 head,tail로 연결
             // ready queue num이 0이 아니면 새로운 process를 PCB의 next로 추가, tail에도 추가 
             //job queue num --, ready queue num ++
         
-        //Defense infinite loop
-        if(time>=100)    break;
 
         //도착시간이 같은 프로세스가 있을 수 있으므로 while문
         while(i<PROCESS_NUM && cloneJobQueue[i]->arrival_time==time){
             printf("<time %d> [new arrival] process %d\n",time,cloneJobQueue[i]->pid);
+            fprintf(outFile,"<time %d> [new arrival] process %d\n",time,cloneJobQueue[i]->pid);
             
             if(ready_queue_num==0){
                 rq.head=cloneJobQueue[i];
                 rq.tail=cloneJobQueue[i];
             }
             else{
-                //cloneJobQueue[i-1]->next=cloneJobQueue[i];
                 rq.tail->next=cloneJobQueue[i];
                 rq.tail=cloneJobQueue[i];
             }
@@ -345,13 +393,12 @@ void RR_simulator(int timequantum){
             ready_queue_num++;
         }
 
-        //jobQueue에 있던 프로세스들이 모두 빠져나간뒤에도 timequantum 비교
         RR_timequantum(timequantum);
                 
         //runningProcess없다면 그리고 ready queue에 프로세스 있다면
             //->ready queue에 있는거 running으로 보내주기
             //running으로 가는 프로세스의 next를 ready queue의 head로 보내주고 next=null
-            //ready queue num -- , new arrival 출력, process is running 출력
+            //ready queue num -- , process is running 출력
             //burstTime --, turnaroundtime++
             //넣어줄게 없으면 system is idle 출력, idle++
         
@@ -374,12 +421,14 @@ void RR_simulator(int timequantum){
 
                 if((prevRunningProcess!=NULL && runningProcess!=NULL)){
                     if(prevRunningProcess!=runningProcess){
-                        printf("------------------------------------ 1(Context-Switch)\n");
+                        printf("------------------------------------ (Context-Switch)\n");
+                        fprintf(outFile,"------------------------------------ (Context-Switch)\n");
                     }
                 }
 
                 printf("<time %d> process %d is running\n",time,runningProcess->pid);
-                
+                fprintf(outFile,"<time %d> process %d is running\n",time,runningProcess->pid);
+
                 ready_queue_num--;
                 runningProcess->burst_time--;
                 runningProcess->tt++;   //여기에서 tt는 running state일 때의 시간
@@ -387,12 +436,14 @@ void RR_simulator(int timequantum){
 
                 if(runningProcess->burst_time==0){
                     printf("<time %d> process %d is finished\n",time,runningProcess->pid);
+                    fprintf(outFile,"<time %d> process %d is finished\n",time,runningProcess->pid);
                     runningProcess=NULL;
                 }    
                 
             }
             else{
                 printf("<time %d> ---- system is idle ----\n",time);
+                fprintf(outFile,"<time %d> ---- system is idle ----\n",time);
                 idle++;
 
                 //runningProcess가 없고, rq.head도 없는상태이므로 prevRunningProcess도 null로 초기화
@@ -412,12 +463,14 @@ void RR_simulator(int timequantum){
             runningProcess->tq++;
             
             printf("<time %d> process %d is running\n",time,runningProcess->pid);
+            fprintf(outFile,"<time %d> process %d is running\n",time,runningProcess->pid);
             runningProcess->burst_time--;
             runningProcess->tt++;   //여기에서 tt는 running state일 때의 시간
 
             
             if(runningProcess->burst_time==0){
                 printf("<time %d> process %d is finished\n",time,runningProcess->pid);    
+                fprintf(outFile,"<time %d> process %d is finished\n",time,runningProcess->pid);
                 runningProcess=NULL;
             }
 
@@ -435,7 +488,8 @@ void RR_simulator(int timequantum){
     printf("<time %d> all processes finish\n",time);
     printf("=================================================\n");
 
-
+    fprintf(outFile,"<time %d> all processes finish\n",time);
+    fprintf(outFile,"=================================================\n");
 
     for(int j=0; j<PROCESS_NUM; j++){
         sumwt+=cloneJobQueue[j]->wt;
@@ -453,6 +507,11 @@ void RR_simulator(int timequantum){
     printf("Average waiting time : %.1f\n",avgwt);
     printf("Average response time : %.1f\n",avgrt);
     printf("Average turnaround time : %.1f\n",avgtt);
+
+    fprintf(outFile,"Average cpu usage : %.2f%%\n",((time-idle)/(float)time)*100);
+    fprintf(outFile,"Average waiting time : %.1f\n",avgwt);
+    fprintf(outFile,"Average response time : %.1f\n",avgrt);
+    fprintf(outFile,"Average turnaround time : %.1f\n",avgtt);
 
 
 }
@@ -530,7 +589,7 @@ void sort_ready_queue()
     PCBpointer auxiliary = rq.head;
     PCBpointer temp = NULL;
     PCBpointer node = NULL;
-    // Execute linked list node
+
     while(auxiliary != NULL)
     {
         node = auxiliary;
@@ -546,17 +605,15 @@ void sort_ready_queue()
         if (auxiliary->priority < node->priority)
         {
             
-            swapData(auxiliary, node);
+            swap_PCB(auxiliary, node);
         }
         auxiliary = auxiliary->next;
     }
 }
-PCBpointer t = NULL;
-PCBpointer importantProcess=NULL;
+
 void Priority_algorithm(float alpha){
     if(rq.head!=NULL){
 
-        //1초마다 비교할것이므로 rq.head가 되는 값만 구하고 나머지 순서는 일단 고려안하고 해보자
         apply_aging(alpha);
     
         sort_ready_queue();
@@ -591,16 +648,8 @@ void Priority_algorithm(float alpha){
     
 
 }
-
 void Priority_simulator(float alpha){
-    //우선순위 같을경우 도착시간 먼저온애 부터
-    //도착시간 같을경우 burst time 짧은애 먼저
-
-    //프로세스 도착할 때마다 aging적용 이후 priority 비교, priority에 따른 재정렬
-
-    //도착한 프로세스 없어도 aging적용 이후 priority 비교, priority에 따른 재정렬
-
-    //정렬할려 할 때 레디큐의 head가 null인지 체크
+    
     float avgwt=0.0;
     float avgrt=0.0;
     float avgtt=0.0;
@@ -619,30 +668,28 @@ void Priority_simulator(float alpha){
     printf("\nScheduling : Preemptive Priority Scheduling with Aging\n");
     printf("=================================================\n");
 
+    fprintf(outFile,"\nScheduling : Preemptive Priority Scheduling with Aging\n");
+    fprintf(outFile,"=================================================\n");
+
     while(!(clone_job_queue_num==0 && ready_queue_num==0 && runningProcess==NULL)){
         //job queue에서 arriveTime이 time과 일치하면 readyQueue로 넣어주기
             //ready queue num이 0이면 PCB를 readyQueue의 head,tail로 연결
             // ready queue num이 0이 아니면 새로운 process를 PCB의 next로 추가, tail에도 추가 
             //job queue num --, ready queue num ++
         
-        //Defense infinite loop
-        if(time>=100){
-            printf("\nclone num: %d, ready num:%d",clone_job_queue_num,ready_queue_num);
-            break;
-        }    
 
         //도착시간이 같은 프로세스가 있을 수 있으므로 while문
         while(i<PROCESS_NUM && cloneJobQueue[i]->arrival_time==time){
             printf("<time %d> [new arrival] process %d\n",time,cloneJobQueue[i]->pid);
-            
+            fprintf(outFile,"<time %d> [new arrival] process %d\n",time,cloneJobQueue[i]->pid);
+
             if(ready_queue_num==0){
                 rq.head=cloneJobQueue[i];
                 rq.tail=cloneJobQueue[i];
             }
             else{
                 insert_by_priority(cloneJobQueue[i]);
-                // rq.tail->next=cloneJobQueue[i];
-                // rq.tail=cloneJobQueue[i];
+                
             }
             i++;
             clone_job_queue_num--;
@@ -654,7 +701,7 @@ void Priority_simulator(float alpha){
         //runningProcess없다면 그리고 ready queue에 프로세스 있다면
             //->ready queue에 있는거 running으로 보내주기
             //running으로 가는 프로세스의 next를 ready queue의 head로 보내주고 next=null
-            //ready queue num -- , new arrival 출력, process is running 출력
+            //ready queue num -- , process is running 출력
             //burstTime --, turnaroundtime++
             //넣어줄게 없으면 system is idle 출력, idle++
         
@@ -677,12 +724,13 @@ void Priority_simulator(float alpha){
 
                 if((prevRunningProcess!=NULL && runningProcess!=NULL)){
                     if(prevRunningProcess!=runningProcess){
-                        printf("------------------------------------ 1(Context-Switch)\n");
+                        printf("------------------------------------ (Context-Switch)\n");
+                        fprintf(outFile,"------------------------------------ (Context-Switch)\n");
                     }
                 }
 
-                printf("<time %d> process %d is running and priority:%d\n",time,runningProcess->pid,runningProcess->priority);
-
+                printf("<time %d> process %d is running\n",time,runningProcess->pid);
+                fprintf(outFile,"<time %d> process %d is running\n",time,runningProcess->pid);
                 
                 ready_queue_num--;
                 runningProcess->burst_time--;
@@ -691,6 +739,7 @@ void Priority_simulator(float alpha){
             
                 if(runningProcess->burst_time==0){
                     printf("<time %d> process %d is finished\n",time,runningProcess->pid);
+                    fprintf(outFile,"<time %d> process %d is finished\n",time,runningProcess->pid);
                     runningProcess=NULL;
                 }
                     
@@ -698,6 +747,7 @@ void Priority_simulator(float alpha){
             }
             else{
                 printf("<time %d> ---- system is idle ----\n",time);
+                fprintf(outFile,"<time %d> ---- system is idle ----\n",time);
                 idle++;
 
                 //runningProcess가 없고, rq.head도 없는상태이므로 prevRunningProcess도 null로 초기화
@@ -715,13 +765,15 @@ void Priority_simulator(float alpha){
         else if(runningProcess!=NULL){
         
             
-            printf("<time %d> process %d is running and priority:%d\n",time,runningProcess->pid,runningProcess->priority);
-            
+            printf("<time %d> process %d is running\n",time,runningProcess->pid);
+            fprintf(outFile,"<time %d> process %d is running\n",time,runningProcess->pid);
+
             runningProcess->burst_time--;
             runningProcess->tt++;   //여기에서 tt는 running state일 때의 시간
 
             if(runningProcess->burst_time==0){
-                printf("<time %d> process %d is finished\n",time,runningProcess->pid);    
+                printf("<time %d> process %d is finished\n",time,runningProcess->pid);
+                fprintf(outFile,"<time %d> process %d is finished\n",time,runningProcess->pid);    
                 runningProcess=NULL;
             }
             
@@ -738,7 +790,8 @@ void Priority_simulator(float alpha){
     printf("<time %d> all processes finish\n",time);
     printf("=================================================\n");
 
-
+    fprintf(outFile,"<time %d> all processes finish\n",time);
+    fprintf(outFile,"=================================================\n");
 
     for(int j=0; j<PROCESS_NUM; j++){
         sumwt+=cloneJobQueue[j]->wt;
@@ -757,9 +810,14 @@ void Priority_simulator(float alpha){
     printf("Average response time : %.1f\n",avgrt);
     printf("Average turnaround time : %.1f\n",avgtt);
     
+    fprintf(outFile,"Average cpu usage : %.2f%%\n",((time-idle)/(float)time)*100);
+    fprintf(outFile,"Average waiting time : %.1f\n",avgwt);
+    fprintf(outFile,"Average response time : %.1f\n",avgrt);
+    fprintf(outFile,"Average turnaround time : %.1f\n",avgtt);
+
+    fclose(outFile);
 }
 
-//알고리즘 수행 뒤 clone_job_queue는 초기화, ready queue는 비우기, runningProcess도 free 해주기
 
 void clear_clone_job_queue(){
     for(int i=0; i<PROCESS_NUM; i++){
@@ -774,9 +832,11 @@ void clear_job_queue(){
         jobQueue[i]=NULL;
     }
 }
+
+
 int main(int argc, char *argv[]){
 
-    read_process_list("input1.dat");
+    read_process_list(argv[1]);
     insert_job_queue();
     sortByat(PROCESS_NUM);
     insert_clone_job_queue();
@@ -787,23 +847,19 @@ int main(int argc, char *argv[]){
 
 
     clear_time();
-    RR_simulator(2);
+    RR_simulator(atoi(argv[2]));
 
     clear_clone_job_queue();
     insert_clone_job_queue();
 
 
     clear_time();
-    Priority_simulator(0.5);
-
-    
+    Priority_simulator(atof(argv[3]));
 
 
-    //모든 알고리즘 끝낸 뒤
-    //list free
-    //job_queue free
-    //ready queue free
-    //running process도 free
+    //메모리 회수
+    clear_clone_job_queue();
+    clear_job_queue();
 
 
     return 0;
