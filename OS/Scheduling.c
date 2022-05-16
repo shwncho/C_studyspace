@@ -42,31 +42,18 @@ void init_job_queue();
 void insert_job_queue();
 void sortByat(int n);
 void insert_clone_job_queue();
-
 void clear_time();
-
 void add_waiting_time();
-
 void FCFS();
-
 void RR_timequantum(int timequantum);
-
 void RR_simulator(int timequantum);
-
 void apply_aging(float alpha);
-
 void insert_by_priority(PCBpointer newProcess);
-
 void swap_PCB (PCBpointer a, PCBpointer b);
-
 void sort_ready_queue();
-
 void Priority_algorithm(float alpha);
-
 void Priority_simulator(float alpha);
-
 void clear_clone_job_queue();
-
 void clear_job_queue();
 
 
@@ -178,7 +165,6 @@ void FCFS(){
 
     int i=0; //index
 
-    outFile = fopen("output1.txt","w");
 
     rq.head=rq.tail=NULL;
 
@@ -815,7 +801,6 @@ void Priority_simulator(float alpha){
     fprintf(outFile,"Average response time : %.1f\n",avgrt);
     fprintf(outFile,"Average turnaround time : %.1f\n",avgtt);
 
-    fclose(outFile);
 }
 
 
@@ -840,6 +825,8 @@ int main(int argc, char *argv[]){
     insert_job_queue();
     sortByat(PROCESS_NUM);
     insert_clone_job_queue();
+
+    outFile = fopen(argv[2],"w");
     FCFS();
 
     clear_clone_job_queue();
@@ -847,15 +834,16 @@ int main(int argc, char *argv[]){
 
 
     clear_time();
-    RR_simulator(atoi(argv[2]));
+    RR_simulator(atoi(argv[3]));
 
     clear_clone_job_queue();
     insert_clone_job_queue();
 
 
     clear_time();
-    Priority_simulator(atof(argv[3]));
-
+    Priority_simulator(atof(argv[4]));
+    
+    fclose(outFile);
 
     //메모리 회수
     clear_clone_job_queue();
@@ -864,6 +852,7 @@ int main(int argc, char *argv[]){
 
     return 0;
 }
+
 
 
 
