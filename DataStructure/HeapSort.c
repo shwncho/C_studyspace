@@ -39,6 +39,8 @@ void heapSort(int arr[], int n){
 
     // Heap sort
     for(int i=n-1; i>=0;i--){
+        //By max heap, arr[0] is max value. So change 0 th index to last index
+        //the result is ascending order
         swap(&arr[0], &arr[i]);
 
         // Heapify root element to get highest element at root again
