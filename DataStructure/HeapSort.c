@@ -1,5 +1,6 @@
 #include<stdio.h>
 
+void printArray(int[], int);
 // Function to swap the position of two elements
 void swap(int *a, int *b){
     int temp= *a;
@@ -36,6 +37,8 @@ void heapSort(int arr[], int n){
     for (int i = n/2-1; i>=0; i--){
         heapify(arr, n, i);
     }
+    printf("\nBuild Max Heap result:\n");
+    printArray(arr,n);
 
     // Heap sort
     for(int i=n-1; i>=0;i--){
@@ -45,6 +48,9 @@ void heapSort(int arr[], int n){
 
         // Heapify root element to get highest element at root again
         heapify(arr, i, 0);
+
+        printf("\nstep: ");
+        printArray(arr,n);
     }
 }
 

@@ -83,11 +83,7 @@ public class Calculator extends JFrame {
         //계산기의 숫자 크기를 조절해주기 위해 Font를 적용
         textAreaNumbers.setText("0");
         textAreaNumbers.setFont(new Font("돋움", Font.BOLD, 44));
-        //오른쪽에서 왼쪽방향으로 쓰여지게 설정
-        textAreaNumbers.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-
         textAreaPreNumbers.setFont(new Font("돋움", Font.PLAIN, 22));
-        textAreaPreNumbers.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 
         buttonNum0.setText("0");
         buttonNum1.setText("1");
@@ -169,85 +165,10 @@ public class Calculator extends JFrame {
         buttonPanel.add(buttonEqual);
 
     }
-
-
-
-    private void calculate(String operator) {
-        if (operator.equalsIgnoreCase("+")) {
-            firstNum = Double.parseDouble(textAreaNumbers.getText());
-            this.operator = "+";
-            this.preOperator=operator;
-
-            textAreaPreNumbers.setText(" + " + firstNum);
-            textAreaNumbers.setText("");
-
-        } else if (operator.equalsIgnoreCase("-")) {
-            firstNum = Double.parseDouble(textAreaNumbers.getText());
-            this.operator = "-";
-            this.preOperator=operator;
-
-            textAreaPreNumbers.setText(" - " + firstNum);
-            textAreaNumbers.setText("");
-
-        } else if (operator.equalsIgnoreCase("x")) {
-            firstNum = Double.parseDouble(textAreaNumbers.getText());
-            this.operator = "*";
-            this.preOperator=operator;
-
-            textAreaPreNumbers.setText(" X " + firstNum);
-            textAreaNumbers.setText("");
-
-        } else if (operator.equalsIgnoreCase("/")) {
-            firstNum = Double.parseDouble(textAreaNumbers.getText());
-            this.operator = "/";
-            this.preOperator=operator;
-
-            textAreaPreNumbers.setText(" / " + firstNum);
-            textAreaNumbers.setText("");
-
-        } else if (operator.equalsIgnoreCase("%")) {
-            firstNum = Double.parseDouble(textAreaNumbers.getText());
-            this.operator = "%";
-            this.preOperator=operator;
-
-            textAreaPreNumbers.setText(" % " + firstNum);
-            textAreaNumbers.setText("");
-
-        } else if (operator.equalsIgnoreCase("=")) {
-            if (firstNum == 0) {
-                return;
-            }
-            double result = 0;
-            secondNum = Double.parseDouble(textAreaNumbers.getText());
-
-            //연산의 결과를 보여주기 위한 코드
-            textAreaPreNumbers.setText(firstNum+preOperator+secondNum);
-
-            if (this.operator.equalsIgnoreCase("+")) {
-                result = firstNum + secondNum;
-            } else if (this.operator.equalsIgnoreCase("-")) {
-                result = firstNum - secondNum;
-            } else if (this.operator.equalsIgnoreCase("*")) {
-                result = firstNum * secondNum;
-            } else if (this.operator.equalsIgnoreCase("/")) {
-                result = firstNum / secondNum;
-            } else if (this.operator.equalsIgnoreCase("%")) {
-                result = firstNum % secondNum;
-            }
-
-            firstNum = result;
-            textAreaNumbers.setText(Double.toString(result));
-
-        }
-    }
-
-
     //계산기에 숫자를 반영할 때 발생하는 이벤트에 필요한 메소드
     private void updateNumber(int num) {
         textAreaNumbers.append(Integer.toString(num));
     }
-
-
     //addActionListener를 간결하게 표현하기 위해 람다식 사용
     private void setEvents() {
         buttonNum0.addActionListener(e -> {
@@ -340,12 +261,12 @@ public class Calculator extends JFrame {
 
         //저장하고 싶은 숫자 S1에 저장
         buttonSave1.addActionListener(e ->{
-            savedNum1 = firstNum;
+            savedNum1 = Double.parseDouble(textAreaNumbers.getText());
         });
 
         //저장하고 싶은 숫자 S2에 저장
         buttonSave2.addActionListener(e ->{
-            savedNum2 = firstNum;
+            savedNum2 = Double.parseDouble(textAreaNumbers.getText());
         });
 
         //S1에 저장된 숫자 Recall
@@ -402,6 +323,77 @@ public class Calculator extends JFrame {
             textAreaNumbers.setText(t);
         });
     }
+
+
+    private void calculate(String operator) {
+        if (operator.equalsIgnoreCase("+")) {
+            firstNum = Double.parseDouble(textAreaNumbers.getText());
+            this.operator = "+";
+            this.preOperator=operator;
+
+            textAreaPreNumbers.setText(firstNum + "+");
+            textAreaNumbers.setText("");
+
+        } else if (operator.equalsIgnoreCase("-")) {
+            firstNum = Double.parseDouble(textAreaNumbers.getText());
+            this.operator = "-";
+            this.preOperator=operator;
+
+            textAreaPreNumbers.setText(firstNum+ "-");
+            textAreaNumbers.setText("");
+
+        } else if (operator.equalsIgnoreCase("X")) {
+            firstNum = Double.parseDouble(textAreaNumbers.getText());
+            this.operator = "*";
+            this.preOperator=operator;
+
+            textAreaPreNumbers.setText(firstNum + "X");
+            textAreaNumbers.setText("");
+
+        } else if (operator.equalsIgnoreCase("/")) {
+            firstNum = Double.parseDouble(textAreaNumbers.getText());
+            this.operator = "/";
+            this.preOperator=operator;
+
+            textAreaPreNumbers.setText(firstNum + "/");
+            textAreaNumbers.setText("");
+
+        } else if (operator.equalsIgnoreCase("%")) {
+            firstNum = Double.parseDouble(textAreaNumbers.getText());
+            this.operator = "%";
+            this.preOperator=operator;
+
+            textAreaPreNumbers.setText(firstNum + "%");
+            textAreaNumbers.setText("");
+
+        } else if (operator.equalsIgnoreCase("=")) {
+            if (firstNum == 0) {
+                return;
+            }
+            double result = 0;
+            secondNum = Double.parseDouble(textAreaNumbers.getText());
+
+            //연산의 결과를 보여주기 위한 코드
+            textAreaPreNumbers.setText(firstNum+preOperator+secondNum);
+
+            if (this.operator.equalsIgnoreCase("+")) {
+                result = firstNum + secondNum;
+            } else if (this.operator.equalsIgnoreCase("-")) {
+                result = firstNum - secondNum;
+            } else if (this.operator.equalsIgnoreCase("*")) {
+                result = firstNum * secondNum;
+            } else if (this.operator.equalsIgnoreCase("/")) {
+                result = firstNum / secondNum;
+            } else if (this.operator.equalsIgnoreCase("%")) {
+                result = firstNum % secondNum;
+            }
+
+            firstNum = result;
+            textAreaNumbers.setText(Double.toString(result));
+
+        }
+    }
+
 
     public static void main(String[] args) {
         new Calculator();
