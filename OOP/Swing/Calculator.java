@@ -3,6 +3,7 @@ import java.awt.*;
 
 public class Calculator extends JFrame {
 
+    //계산기 사이즈
     public static final int WIDTH=350;
     public static final int HEIGHT=570;
 
@@ -19,7 +20,9 @@ public class Calculator extends JFrame {
     private JPanel textPanel = new JPanel();
     private JPanel buttonPanel = new JPanel();
 
+    //입력된 값과 연산을 보여주는 용도
     JTextArea textAreaPreNumbers = new JTextArea();
+    //입력하고 있는 숫자와 결과를 보여주는 용도
     JTextArea textAreaNumbers = new JTextArea();
 
     JButton buttonNum0 = new JButton();
@@ -33,7 +36,6 @@ public class Calculator extends JFrame {
     JButton buttonNum8 = new JButton();
     JButton buttonNum9 = new JButton();
 
-    JButton buttonPlusMinus = new JButton();
     JButton buttonMultiple = new JButton();
     JButton buttonPlus = new JButton();
     JButton buttonMinus = new JButton();
@@ -53,7 +55,9 @@ public class Calculator extends JFrame {
     JButton buttonClear1 = new JButton();
     JButton buttonClear2 = new JButton();
 
-    JButton buttonBlank = new JButton();
+    //layout의 모양을 맞추기 위한 용도
+    JButton buttonBlank1 = new JButton();
+    JButton buttonBlank2 = new JButton();
 
 
 
@@ -71,6 +75,7 @@ public class Calculator extends JFrame {
         add(textPanel);
         add(buttonPanel);
 
+        pack();
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setVisible(true);
     }
@@ -100,7 +105,6 @@ public class Calculator extends JFrame {
         buttonMinus.setText("-");
         buttonPlus.setText("+");
         buttonRemainder.setText("%");
-        buttonPlusMinus.setText("+/-");
         buttonEqual.setText("=");
         buttonDot.setText(".");
 
@@ -127,10 +131,11 @@ public class Calculator extends JFrame {
         // Button Panel
         buttonPanel.setLayout(new GridLayout(7, 4));
 
+        //맨 위에서부터 순서를 유지하며 넣어줘야 한다.
         buttonPanel.add(buttonClear1);
         buttonPanel.add(buttonClear2);
         buttonPanel.add(buttonReset);
-        buttonPanel.add(buttonBlank);
+        buttonPanel.add(buttonBlank1);
 
         buttonPanel.add(buttonSave1);
         buttonPanel.add(buttonSave2);
@@ -158,10 +163,11 @@ public class Calculator extends JFrame {
         buttonPanel.add(buttonNum3);
         buttonPanel.add(buttonPlus);
 
-        buttonPanel.add(buttonPlusMinus);
+        buttonPanel.add(buttonBlank2);
         buttonPanel.add(buttonNum0);
         buttonPanel.add(buttonDot);
         buttonPanel.add(buttonEqual);
+
     }
 
 
@@ -188,7 +194,6 @@ public class Calculator extends JFrame {
             this.operator = "*";
             this.preOperator=operator;
 
-
             textAreaPreNumbers.setText(" X " + firstNum);
             textAreaNumbers.setText("");
 
@@ -214,6 +219,8 @@ public class Calculator extends JFrame {
             }
             double result = 0;
             secondNum = Double.parseDouble(textAreaNumbers.getText());
+
+            //연산의 결과를 보여주기 위한 코드
             textAreaPreNumbers.setText(firstNum+preOperator+secondNum);
 
             if (this.operator.equalsIgnoreCase("+")) {
@@ -306,6 +313,10 @@ public class Calculator extends JFrame {
             updateNumber(9);
         });
 
+        buttonDot.addActionListener(e -> {
+            textAreaNumbers.append(".");
+        });
+
         //text상에있는 변수들을 초기화
         buttonClearAll.addActionListener(e -> {
             textAreaNumbers.setText("");
@@ -327,26 +338,32 @@ public class Calculator extends JFrame {
         });
 
 
+        //저장하고 싶은 숫자 S1에 저장
         buttonSave1.addActionListener(e ->{
             savedNum1 = firstNum;
         });
 
+        //저장하고 싶은 숫자 S2에 저장
         buttonSave2.addActionListener(e ->{
             savedNum2 = firstNum;
         });
 
+        //S1에 저장된 숫자 Recall
         buttonRecall1.addActionListener(e -> {
             textAreaNumbers.setText(Double.toString(savedNum1));
         });
 
+        //S2에 저장된 숫자 Recall
         buttonRecall2.addActionListener(e -> {
             textAreaNumbers.setText(Double.toString(savedNum2));
         });
 
+        //S1에 저장된 숫자 Clear
         buttonClear1.addActionListener(e -> {
             savedNum1=0;
         });
 
+        //S2에 저장된 숫자 Clear
         buttonClear2.addActionListener(e -> {
             savedNum2=0;
         });
@@ -374,8 +391,6 @@ public class Calculator extends JFrame {
         buttonEqual.addActionListener(e -> {
             calculate("=");
         });
-
-
 
 
         buttonDelete.addActionListener(e -> {
