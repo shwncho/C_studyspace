@@ -8,11 +8,15 @@ public class Calculator extends JFrame {
     public static final int HEIGHT=570;
 
     //계산기에 사용되는 전역변수들
+
+    //연산되는 두 수
     double firstNum;
     double secondNum;
 
+    //저장되는 두 수
     double savedNum1;
     double savedNum2;
+
 
     String preOperator="";
     String operator = "";
@@ -75,7 +79,6 @@ public class Calculator extends JFrame {
         add(textPanel);
         add(buttonPanel);
 
-        pack();
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setVisible(true);
     }
@@ -177,6 +180,7 @@ public class Calculator extends JFrame {
             if (textAreaNumbers.getText().equalsIgnoreCase("0")) {
                 textAreaNumbers.setText("");
             }
+
             updateNumber(0);
         });
         buttonNum1.addActionListener(e -> {
@@ -261,12 +265,22 @@ public class Calculator extends JFrame {
 
         //저장하고 싶은 숫자 S1에 저장
         buttonSave1.addActionListener(e ->{
-            savedNum1 = Double.parseDouble(textAreaNumbers.getText());
+            try{
+                savedNum1 = Double.parseDouble(textAreaNumbers.getText());
+            } catch(NumberFormatException error){
+                textAreaPreNumbers.setText("Error: Reenter Number.");
+                textAreaNumbers.setText("");
+            }
         });
 
         //저장하고 싶은 숫자 S2에 저장
         buttonSave2.addActionListener(e ->{
-            savedNum2 = Double.parseDouble(textAreaNumbers.getText());
+            try{
+                savedNum2 = Double.parseDouble(textAreaNumbers.getText());
+            } catch(NumberFormatException error){
+                textAreaPreNumbers.setText("Error: Reenter Number.");
+                textAreaNumbers.setText("");
+            }
         });
 
         //S1에 저장된 숫자 Recall
@@ -290,27 +304,57 @@ public class Calculator extends JFrame {
         });
 
         buttonDevide.addActionListener(e -> {
-            calculate("/");
+            try{
+                calculate("/");
+            } catch(NumberFormatException error){
+                textAreaPreNumbers.setText("Error: Reenter Number.");
+                textAreaNumbers.setText("");
+            }
         });
 
         buttonPlus.addActionListener(e -> {
-            calculate("+");
+            try{
+                calculate("+");
+            } catch(NumberFormatException error){
+                textAreaPreNumbers.setText("Error: Reenter Number.");
+                textAreaNumbers.setText("");
+            }
         });
 
         buttonMinus.addActionListener(e -> {
-            calculate("-");
+            try{
+                calculate("-");
+            } catch(NumberFormatException error){
+                textAreaPreNumbers.setText("Error: Reenter Number.");
+                textAreaNumbers.setText("");
+            }
         });
 
         buttonMultiple.addActionListener(e -> {
-            calculate("X");
+            try{
+                calculate("X");
+            } catch(NumberFormatException error){
+                textAreaPreNumbers.setText("Error: Reenter Number.");
+                textAreaNumbers.setText("");
+            }
         });
 
         buttonRemainder.addActionListener(e -> {
-            calculate("%");
+            try{
+                calculate("%");
+            } catch(NumberFormatException error){
+                textAreaPreNumbers.setText("Error: Reenter Number.");
+                textAreaNumbers.setText("");
+            }
         });
 
         buttonEqual.addActionListener(e -> {
-            calculate("=");
+            try{
+                calculate("=");
+            } catch(NumberFormatException error){
+                textAreaPreNumbers.setText("Error: Reenter Number.");
+                textAreaNumbers.setText("");
+            }
         });
 
 
@@ -325,7 +369,7 @@ public class Calculator extends JFrame {
     }
 
 
-    private void calculate(String operator) {
+    private void calculate(String operator) throws NumberFormatException{
         if (operator.equalsIgnoreCase("+")) {
             firstNum = Double.parseDouble(textAreaNumbers.getText());
             this.operator = "+";
