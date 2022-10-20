@@ -5,7 +5,7 @@ public class Account {
 
     public String check(){
         // 계좌 상태 출력
-        return "고객명: "+name+ " 잔 액: "+balance;
+        return "name: "+name+ " balance: "+balance;
     }
 
     public synchronized void deposit(double cache){
