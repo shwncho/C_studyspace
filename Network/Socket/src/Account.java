@@ -4,7 +4,6 @@ public class Account {
 
 
     public String check(){
-        // 계좌 상태 출력
         return "name: "+name+ " balance: "+balance;
     }
 

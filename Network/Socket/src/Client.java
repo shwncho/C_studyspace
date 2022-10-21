@@ -1,13 +1,20 @@
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
+import java.util.StringTokenizer;
 
 public class Client {
     public static void main(String[] args) throws Exception{
+
         try{
-            Socket socket = new Socket("127.0.0.1",6789);
+            BufferedReader br = new BufferedReader(new FileReader("serverinfo.dat"));
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            String host = st.nextToken();
+            int port = Integer.parseInt(st.nextToken());
+
+            Socket socket = new Socket(host,port);
             Thread thread = new ClientThread(socket);
             thread.start();
-        } catch (IOException e){
+        } catch (Exception e){
             System.out.println(e.getMessage());
         }
 

@@ -8,11 +8,12 @@ public class Server {
     public static void main(String[] args) throws Exception{
         ServerSocket serverSocket;
         HashMap<String, Account> client=new HashMap<>();
-        client.put("조석환",new Account("조석환",10000));
-        client.put("정조은",new Account("정조은",1000));
-        client.put("서은수",new Account("서은수",5000));
-        client.put("이서현",new Account("이서현",50));
-        client.put("남선우",new Account("남선우",20));
+        //Client 5 account info
+        client.put("Cho",new Account("Cho",10000));
+        client.put("Jeong",new Account("Jeong",1000));
+        client.put("Seo",new Account("Seo",5000));
+        client.put("Lee",new Account("Lee",50));
+        client.put("Nam",new Account("Nam",20));
 
         try{
             serverSocket = new ServerSocket(6789);

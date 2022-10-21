@@ -6,8 +6,11 @@ import java.net.Socket;
 
 public class ClientThread extends Thread{
     Socket socket;
+    //name entered by the user
     String clientName;
+    //display user menu
     String menu;
+    //choice menuNum
     String menuNum;
     boolean flag = true;
 
@@ -24,132 +27,137 @@ public class ClientThread extends Thread{
 
             System.out.println("Enter your name: ");
 
-            //이름 입력받음
+            //Entered by user
             clientName = inFromUser.readLine();
 
-            //이름을 서버로 보냄
+            //send to server
             writer.println(clientName);
             writer.flush();
 
-            //없는 고객일 경우 예외 처리
+            //If user does not exist, Exception is occurred
             String nameCheck = inFromServer.readLine();
-            if(!nameCheck.equals("success")){
-                System.out.println("Error message: Account doesn't exist");
+            if(nameCheck.equals("4000")){
+                System.out.println("code: 4000,\nmessage: Account doesn't exist");
                 socket.close();
             }
-            else System.out.println("Success Login");
+            else System.out.println("code: 1000,\nmessage: Success Login");
 
-            while(true){
-
+            while(flag){
+                //receive menu by server
                 menu = inFromServer.readLine();
+                //display user menu
                 System.out.println(menu);
 
-
+                //user enter menuNum
                 menuNum = inFromUser.readLine();
 
-                //서버로 메뉴 번호 보냄
+                //send menuNum to server
                 writer.println(menuNum);
                 writer.flush();
-                try{
+
                 switch (menuNum) {
 
-                        //이름과 잔액 확인
-                        case "1":
+                    //check
+                    case "1":
+                        System.out.println("code:1000\nmessage:"+inFromServer.readLine());
+                        break;
+
+                    //deposit
+                    case "2":
+                        //entered deposit money by user
+                        System.out.println("Enter deposit money");
+                        String depositMoney = inFromUser.readLine();
+
+                        //send depositMoney to server
+                        writer.println(depositMoney);
+                        writer.flush();
+
+                        //check if entered value is numeric
+                        String checkNumeric = inFromServer.readLine();
+                        if(checkNumeric.equals("4001")){
+                            System.out.println("code:4001,\nmessage: you have to enter only number");
+                            continue;
+                        }
+
+
+                        System.out.println("code:1000,\nmessage: After deposit, your balance");
+                        System.out.println(inFromServer.readLine());
+                        break;
+
+                    //withdraw
+                    case "3":
+                        //entered withdrawMoney by user
+                        System.out.println("Enter withdraw money");
+                        String withdrawMoney = inFromUser.readLine();
+
+                        //send withdrawMoney to server
+                        writer.println(withdrawMoney);
+                        writer.flush();
+
+                        //check if entered value is numeric
+                        checkNumeric = inFromServer.readLine();
+                        if(checkNumeric.equals("4001")){
+                            System.out.println("code:4001,\nmessage: you have to enter only number");
+                            continue;
+                        }
+
+                        //check user's balance
+                        String withdrawResult = inFromServer.readLine();
+                        if (withdrawResult.equals("4002")) {
+                            System.out.println("code:4002,\nmessage: Your account balance is insufficient.");
+                            continue;
+                        } else {
+                            System.out.println("code:1000,\nmessage:After withdraw, your balance");
                             System.out.println(inFromServer.readLine());
                             break;
+                        }
 
-                        //입금
-                        case "2":
-                            //유저에게 입금액 입력받기
-                            System.out.println("Enter deposit money");
-                            String depositMoney = inFromUser.readLine();
+                    //transfer
+                    case "4":
+                        //Entered the transfer target and the transfer money by user
+                        System.out.println("Enter the transfer target and the transfer money in order.(between target and money, greater than 1 space)");
+                        writer.println(inFromUser.readLine());
+                        writer.flush();
 
-                            //서버로 입금액 보내기
-                            writer.println(depositMoney);
-                            writer.flush();
+                        //check argument number(number have to have 2(target, money))
+                        String argumentCheck = inFromServer.readLine();
+                        if (argumentCheck.equals("4003")) {
+                            System.out.println("code:4003,\nmessage: lack of arguments");
+                            continue;
+                        }
 
-                            String checkNumeric = inFromServer.readLine();
-                            if(!checkNumeric.equals("success")){
-                                System.out.println("Error Message: you have to enter only number");
-                                continue;
-                            }
-
-                            //입금이후 잔액
-                            System.out.println("After deposit, your balance");
+                        //check user's balance
+                        String transferCheck = inFromServer.readLine();
+                        if (transferCheck.equals("4002")) {
+                            System.out.println("code:4002,\nmessage: Your account balance is insufficient.");
+                            continue;
+                        } else if (transferCheck.equals("4000")) {
+                            System.out.println("code:4000,\nmessage: Account doesn't exist");
+                            continue;
+                        } else {
+                            System.out.println("code:1000,\nmessage: After transfer, your balance");
                             System.out.println(inFromServer.readLine());
                             break;
+                        }
 
-                        //출금
-                        case "3":
-                            //유저에게 출금액 입력받기
-                            System.out.println("Enter withdraw money");
-                            String withdrawMoney = inFromUser.readLine();
+                    // exit banking system
+                    case "5":
+                        flag = false;
+                        socket.close();
+                        break;
 
-                            //서버로 출금액 보내기
-                            writer.println(withdrawMoney);
-                            writer.flush();
-
-                            checkNumeric = inFromServer.readLine();
-                            if(!checkNumeric.equals("success")){
-                                System.out.println("Error Message: you have to enter only number");
-                                continue;
-                            }
-
-
-                            String withdrawResult = inFromServer.readLine();
-                            if (!withdrawResult.equals("success")) {
-                                System.out.println("Error Message: Your account balance is insufficient.");
-                                continue;
-                            } else {
-                                System.out.println("After withdraw, your balance");
-                                System.out.println(inFromServer.readLine());
-                                break;
-                            }
-
-
-                            //이체
-                        case "4":
-                            //유저로부터 이체 대상과 금액 입력받기
-                            System.out.println("Enter the transfer target and the transfer money in order.(between target and money, greater than 1 space)");
-                            writer.println(inFromUser.readLine());
-                            writer.flush();
-
-                            String argumentResult = inFromServer.readLine();
-                            if (!argumentResult.equals("success")) {
-                                System.out.println("Error message: lack of arguments");
-                                continue;
-                            }
-
-                            String transferResult = inFromServer.readLine();
-                            if (transferResult.equals("Exception: Your account balance is insufficient.")) {
-                                System.out.println("Error message: Your account balance is insufficient.");
-                                continue;
-                            } else if (transferResult.equals("Exception: Account not found")) {
-                                System.out.println("Error message: Account doesn't exist");
-                                continue;
-                            } else {
-                                System.out.println("After transfer, your balance");
-                                System.out.println(inFromServer.readLine());
-                                break;
-                            }
-
-                            // 거래 종료
-                        case "5":
-                            flag = false;
-                            socket.close();
-                            break;
-
-                        default:
-                            System.out.println(inFromServer.readLine());
-                    }
-                }catch(Exception e){
-                    System.out.println("Invalid input. Please try again.");
+                    //If a value other than the menu number is entered
+                    default:
+                        if(inFromServer.readLine().equals("4001")){
+                            System.out.println("code:4001,\nmessage: you have to enter number(1~5)");
+                        }
                 }
+
             }
 
 
         } catch (IOException e){
-            System.out.println(e.getMessage());
+            System.out.println("code:4004\n"+e.getMessage());
         }
     }
 }

@@ -32,45 +32,50 @@ public class ServerThread extends Thread{
             try{
                 BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                //이름 읽기
+                //check if client is
                 clientName = reader.readLine();
                 Account out = null;
                 if(client.containsKey(clientName)){
                     out = client.get(clientName);
-                    writer.println("success");
+                    writer.println("1000");
                     writer.flush();
                 }
                 else{
-                    writer.println("Exception: Account not found");
+                    System.out.println("Exception: Account not found");
+                    writer.println("4000");
                     writer.flush();
                     socket.close();
                 }
                 while(flag) {
                     try {
+                        //send menu to client
                         writer.println(menu);
                         writer.flush();
 
+                        //receive menuNum by client
                         menuNum = reader.readLine();
 
                         switch (menuNum) {
 
-                            //이름과 잔액 확인
+                            //check name and balance
                             case "1":
                                 writer.println(out.check());
                                 writer.flush();
 
                                 break;
 
-                            // 입금
+                            // deposit
                             case "2":
+                                //receive depositMoney by client
                                 String money = reader.readLine();
                                 if(!isNumeric(money)){
-                                    writer.println("Invalid input. Please try again.");
+                                    System.out.println("Exception: Invalid input.(not numeric)");
+                                    writer.println("4001");
                                     writer.flush();
                                     continue;
                                 }
                                 else{
-                                    writer.println("success");
+                                    writer.println("1000");
                                     writer.flush();
                                 }
 
@@ -82,28 +87,30 @@ public class ServerThread extends Thread{
 
                                 break;
 
-                            // 출금
+                            //withdraw
                             case "3":
+                                //receive withdrawMoney by client
                                 money = reader.readLine();
                                 if(!isNumeric(money)){
-                                    writer.println("Invalid input. Please try again.");
+                                    System.out.println("Exception: Invalid input.(not numeric)");
+                                    writer.println("4001");
                                     writer.flush();
                                     continue;
                                 }
                                 else{
-                                    writer.println("success");
+                                    writer.println("1000");
                                     writer.flush();
                                 }
                                 double withdrawMoney = Double.parseDouble(money);
 
+                                //If withdrawMoney is more than client's balance, Exception is occurred
                                 if (withdrawMoney > out.getBalance()) {
-
-                                    //출금액이 계좌 잔고보다 많을경우
-                                    writer.println("Your account balance is insufficient.");
+                                    System.out.println("Exception: Account balance is insufficient.");
+                                    writer.println("4002");
                                     writer.flush();
                                     continue;
                                 } else {
-                                    writer.println("success");
+                                    writer.println("1000");
                                     out.withdraw(withdrawMoney);
 
                                     writer.println(out.check());
@@ -112,34 +119,40 @@ public class ServerThread extends Thread{
 
                                 break;
 
-                            // 이체
+                            // transfer
                             case "4":
 
+                                //check argument number(number have to have 2(target, money))
                                 StringTokenizer st = new StringTokenizer(reader.readLine());
                                 if (st.countTokens() == 2) {
-                                    writer.println("success");
+                                    writer.println("1000");
                                     writer.flush();
                                 } else {
-                                    writer.println("Exception: lack of arguments");
+                                    System.out.println("Exception: lack of arguments");
+                                    writer.println("4003");
                                     writer.flush();
                                     continue;
 
                                 }
                                 String targetName = st.nextToken();
                                 Double transferMoney = Double.parseDouble(st.nextToken());
+                                //check if transfer target is
                                 if (client.containsKey(targetName)) {
+                                    //If transferMoney is more than client's balance, Exception is occurred
                                     if (out.getBalance() < transferMoney) {
-                                        writer.println("Exception: Your account balance is insufficient.");
+                                        System.out.println("Exception: Account balance is insufficient.");
+                                        writer.println("4002");
                                         writer.flush();
                                         continue;
                                     }
                                     out.transfer(client.get(targetName), transferMoney);
 
-                                    writer.println("success");
+                                    writer.println("1000");
                                     writer.flush();
 
                                 } else {
-                                    writer.println("Exception: Account not found");
+                                    System.out.println("Exception: Account not found");
+                                    writer.println("4000");
                                     writer.flush();
                                     continue;
                                 }
@@ -148,14 +161,16 @@ public class ServerThread extends Thread{
                                 writer.flush();
                                 break;
 
-                            // 거래 종료
+                            // exit banking system
                             case "5":
                                 flag = false;
                                 socket.close();
                                 break;
 
+                            //If a value other than the menu number is entered
                             default:
-                                writer.println("Invalid input. Please try again.");
+                                System.out.println("Invalid input. (no operation)");
+                                writer.println("4001");
                                 writer.flush();
                         }
                     } catch(Exception e){
@@ -169,6 +184,7 @@ public class ServerThread extends Thread{
             }
     }
 
+    //method, check if value is numeric
     private static boolean isNumeric(String s){
         try{
             Double.parseDouble(s);
