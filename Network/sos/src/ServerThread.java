@@ -12,14 +12,19 @@ public class ServerThread extends Thread {
     private PrintWriter writer;
     private StringTokenizer st;
     private Account account;
-    Map<String,Account> grid;
+    Map<String,Account> playUser;
+    Map<String, Account> userDB;
     ArrayList<Point> seats;
+    AtomicInteger userLifes;
+    private final int MOVE_SIZE=10;
 
 
-    ServerThread(Socket socket, Map<String,Account> grid, ArrayList<Point> seats){
+    ServerThread(Socket socket, Map<String,Account> playUser, ArrayList<Point> seats,Map<String,Account> userDB,AtomicInteger userLifes){
         this.socket=socket;
-        this.grid=grid;
+        this.playUser=playUser;
+        this.userDB=userDB;
         this.seats=seats;
+        this.userLifes=userLifes;
         try{
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new PrintWriter(socket.getOutputStream());
@@ -31,32 +36,36 @@ public class ServerThread extends Thread {
     @Override
     public void run(){
         //실행 로직 선택숫자
-        // 1. 회원가입 2. 로그인
         String num="";
         //클라이언트로부터 넘겨받는 메세지
         String msg="";
         try{
             while(true){
-                if((num=reader.readLine())!=null){
+                if((msg=reader.readLine())!=null){
+                    st=new StringTokenizer(msg," ");
+                    num=st.nextToken();
                     switch (num){
                         case "1":
                             //회원가입
-                            msg=reader.readLine();
+                            msg=st.nextToken();
                             signUp(msg);
                             break;
                         case "2":
                             //로그인
-                            msg=reader.readLine();
+                            msg=st.nextToken();
                             signIn(msg);
                             break;
                         case "3":
                             //게임시작
+                            msg=st.nextToken();
                             startGame(msg);
                             break;
                         case "4":
+                            msg=st.nextToken();
                             move(msg);
                             break;
                         case "5":
+                            msg=st.nextToken();
                             nextRound(msg);
                             break;
                         case "6":
@@ -89,13 +98,14 @@ public class ServerThread extends Thread {
         String password = st.nextToken();
 
         //이미 존재하는 닉네임 일경우
-        if(grid.containsKey(nickname)){
-            writer.println("Exception: ALREADY EXISTS NICKNAME");
+        if(userDB.containsKey(nickname)){
+            writer.println("4000");
             writer.flush();
         }
         else{
-            account=new Account(nickname,password);
-            writer.println("Success: SIGNUP");
+            this.account=new Account(nickname,password);
+            userDB.put(nickname,account);
+            writer.println("SUCCESS");
             writer.flush();
         }
     }
@@ -107,27 +117,27 @@ public class ServerThread extends Thread {
         String password = st.nextToken();
 
         //존재하지 않는 닉네임 일경우
-        if(!grid.containsKey(nickname)){
-            writer.println("Exception: ACCOUNT NOT FOUND");
+        if(!userDB.containsKey(nickname)){
+            writer.println("4001");
             writer.flush();
         }
-        else if(grid.get(nickname).getPassword()!=password){
-            writer.println("Exception: PASSWORD NOT EQUALS");
+        else if(!userDB.get(nickname).getPassword().equals(password)){
+            writer.println("4002");
             writer.flush();
         }
         else{
             //가장 먼저 로그인해서 방에 입장한 유저에게 host 부여
-            grid.put(nickname,account);
-            if(grid.size()==1){
-                grid.get(nickname).setHost(true);
+            playUser.put(nickname,account);
+            if(playUser.size()==1){
+                playUser.get(nickname).setHost(true);
                 writer.println("Host is: "+nickname);
                 writer.flush();
             }
-            else if(grid.size()>4){
-                writer.println("Exception: PLAYER CAN NOT MORE THAN 4");
+            else if(playUser.size()>4){
+                writer.println("4003");
                 writer.flush();
             }
-            else grid.get(nickname).setHost(false);
+            else playUser.get(nickname).setHost(false);
             //방 입장 메세지
             joinUser();
         }
@@ -140,28 +150,33 @@ public class ServerThread extends Thread {
 
     private void startGame(String msg){
         //게임 시작하는 유저의 닉네임을 넘겨받는다.
-        if(grid.size()!=4){
-            writer.println("Exception: INITIAL PLAYER IS NOT 4");
+        if(playUser.size()<4){
+            writer.println("4004");
             writer.flush();
         }
         else{
-            Account user = grid.get(msg);
+            Account user = playUser.get(msg);
             user.setSeated(false);
             user.setLife(true);
+            userLifes.incrementAndGet();
             user.setPoint(randomUserLocation());
 
             writer.println(user.getNickname()+" "+user.getPoint());
-            writer.println("seat: "+ randomSeatLocation());
-            writer.flush();
+            //게임시작할 때 3개
+            if(seats.size()<4){
+                writer.println("seat: "+randomSeatLocation());
+                writer.flush();
+            }
+
 
         }
 
     }
 
     private Point randomUserLocation(){
-        //격자판 크기 정해지면 제대로 할당
-        int x = (int)(Math.random()*10);
-        int y = (int)(Math.random()*10);
+        //랜덤 유저 위치 할당
+        int x = (int)(Math.random()*38 + 1)*MOVE_SIZE;
+        int y = (int)(Math.random()*38 + 1)*MOVE_SIZE;
 
         return new Point(x,y);
     }
@@ -171,12 +186,12 @@ public class ServerThread extends Thread {
         Point seat=null;
         //현재 유저 위치의 격자판을 제외하고 의자 위치 생성
         while(true){
-            //격자판 크기 정해지면 제대로 할당
-            int x = (int)(Math.random()*10);
-            int y = (int)(Math.random()*10);
+            //랜덤 의자 위치 할당
+            int x = (int)(Math.random()*38 +1)*MOVE_SIZE;
+            int y = (int)(Math.random()*38 +1)*MOVE_SIZE;
 
             seat = new Point(x,y);
-            for (Account user : grid.values()) {
+            for (Account user : playUser.values()) {
                 if(user.getPoint().equals(seat))    flag=false;
             }
             if(flag)    break;
@@ -192,7 +207,7 @@ public class ServerThread extends Thread {
         String nickname = st.nextToken();
         String key = st.nextToken();
 
-        Account user = grid.get(nickname);
+        Account user = playUser.get(nickname);
         Point userPoint = user.getPoint();
 
         if(key.equals("W")){
@@ -208,7 +223,7 @@ public class ServerThread extends Thread {
             moveD(user,userPoint);
         }
         else{
-            writer.println("Exception: INVALID INPUT");
+            writer.println("4005");
             writer.flush();
         }
 
@@ -224,31 +239,27 @@ public class ServerThread extends Thread {
     }
 
     private void moveW(Account user, Point userPoint){
-        user.setPoint(new Point(userPoint.getX(),userPoint.getY()+1));
-        seats.stream().filter(s-> s.equals(user.getPoint())).forEach(s -> {
-            seats.remove(s);
-            user.setSeated(true);
-        });
+        user.setPoint(new Point(userPoint.getX(),userPoint.getY()-1));
+        checkSeat(user);
     }
 
     private void moveA(Account user, Point userPoint){
         user.setPoint(new Point(userPoint.getX()-1, userPoint.getY()));
-        seats.stream().filter(s-> s.equals(user.getPoint())).forEach(s -> {
-            seats.remove(s);
-            user.setSeated(true);
-        });
+        checkSeat(user);
     }
 
     private void moveS(Account user, Point userPoint){
-        user.setPoint(new Point(userPoint.getX(), userPoint.getY()-1));
-        seats.stream().filter(s-> s.equals(user.getPoint())).forEach(s -> {
-            seats.remove(s);
-            user.setSeated(true);
-        });
+        user.setPoint(new Point(userPoint.getX(), userPoint.getY()+1));
+        checkSeat(user);
     }
 
     private void moveD(Account user, Point userPoint){
         user.setPoint(new Point(userPoint.getX()+1, userPoint.getY()));
+        checkSeat(user);
+    }
+
+    //유저가 이동한 위치가 의자인지 확인
+    private void checkSeat(Account user){
         seats.stream().filter(s-> s.equals(user.getPoint())).forEach(s -> {
             seats.remove(s);
             user.setSeated(true);
@@ -260,19 +271,24 @@ public class ServerThread extends Thread {
     }
 
     private void finishRound(){
-        if(!account.isSeated()){
+        if(account.isLife() && !account.isSeated()){
             account.setLife(false);
+            userLifes.decrementAndGet();
             writer.println("Fail user: "+account.getNickname());
             writer.flush();
         }
         //마지막 턴에서 이긴 유저는 클라이언트에서 winner 출력해주기
+        if(userLifes.get()==1){
+            writer.println("Winner: "+account.getNickname());
+            writer.flush();
+        }
 
     }
 
     private void nextRound(String msg){
         //Life가 있는 유저인지 확인
         if(account.isLife()){
-            Account user = grid.get(msg);
+            Account user = playUser.get(msg);
             user.setSeated(false);
             user.setPoint(randomUserLocation());
 
@@ -286,14 +302,14 @@ public class ServerThread extends Thread {
     //host가 10초안에 게임 시작 안할 시 변경
     private void changeHost(){
         String prevHostNick="";
-        for(Account user : grid.values()){
+        for(Account user : playUser.values()){
             if(user.isHost()){
                 prevHostNick=user.getNickname();
                 user.setHost(false);
             }
         }
 
-        for(Account user : grid.values()){
+        for(Account user : playUser.values()){
             if(!user.isHost() && !user.getNickname().equals(prevHostNick)){
                 user.setHost(true);
                 writer.println("New host: "+user.getNickname());
@@ -306,7 +322,7 @@ public class ServerThread extends Thread {
     private void exit(){
         if(account.isHost())    changeHost();
         writer.println("Exit user: "+account.getNickname());
-        grid.remove(account.getNickname());
+        playUser.remove(account.getNickname());
         try {
             socket.close();
         } catch (IOException e) {

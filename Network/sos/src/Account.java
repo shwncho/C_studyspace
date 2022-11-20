@@ -1,5 +1,3 @@
-import java.util.Collections;
-
 public class Account {
     private String nickname;
     private String password;
