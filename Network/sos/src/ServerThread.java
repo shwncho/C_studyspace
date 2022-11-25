@@ -42,7 +42,7 @@ public class ServerThread extends Thread {
         try{
             while(true){
                 if((msg=reader.readLine())!=null){
-                    st=new StringTokenizer(msg," ");
+                    st=new StringTokenizer(msg,"#");
                     num=st.nextToken();
                     switch (num){
                         case "1":
