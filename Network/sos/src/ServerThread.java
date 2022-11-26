@@ -57,16 +57,14 @@ public class ServerThread extends Thread {
                             break;
                         case "3":
                             //게임시작
-                            msg=st.nextToken();
-                            startGame(msg);
+                            startGame();
                             break;
                         case "4":
                             msg=st.nextToken();
                             move(msg);
                             break;
                         case "5":
-                            msg=st.nextToken();
-                            nextRound(msg);
+                            nextRound();
                             break;
                         case "6":
                             changeHost();
@@ -128,6 +126,7 @@ public class ServerThread extends Thread {
         else{
             //가장 먼저 로그인해서 방에 입장한 유저에게 host 부여
             playUser.put(nickname,account);
+            account.setWriter(writer);
             if(playUser.size()==1){
                 playUser.get(nickname).setHost(true);
                 writer.println("Host is: "+nickname);
@@ -144,30 +143,37 @@ public class ServerThread extends Thread {
     }
 
     private void joinUser(){
-        writer.println(account.getNickname() + "이(가) 입장했습니다.");
-        writer.flush();
+        broadCast(account.getNickname() + "이(가) 입장했습니다.");
+        broadCast("현재 인원: ("+playUser.size()+"/4");
     }
 
-    private void startGame(String msg){
-        //게임 시작하는 유저의 닉네임을 넘겨받는다.
+    private void startGame(){
         if(playUser.size()<4){
             writer.println("4004");
             writer.flush();
         }
         else{
-            Account user = playUser.get(msg);
-            user.setSeated(false);
-            user.setLife(true);
-            userLifes.incrementAndGet();
-            user.setPoint(randomUserLocation());
+            broadCast("After 3 seconds, Game Start");
+            try{
+                Thread.sleep(3000);
+            }catch(InterruptedException e){
+                e.printStackTrace();
+            }
+            broadCast("--------------Game Start--------------");
 
-            writer.println(user.getNickname()+" "+user.getPoint());
-            //게임시작할 때 3개
-            if(seats.size()<4){
-                writer.println("seat: "+randomSeatLocation());
-                writer.flush();
+            for(Account user : playUser.values()){
+                user.setSeated(false);
+                user.setLife(true);
+                userLifes.incrementAndGet();
+                user.setPoint(randomUserLocation());
+
+                broadCast(user.getNickname()+" "+user.getPoint());
             }
 
+            //게임시작할 때 3개
+            for(int i=0; i<3; i++){
+                broadCast("seat: "+randomSeatLocation());
+            }
 
         }
 
@@ -228,13 +234,16 @@ public class ServerThread extends Thread {
         }
 
         //움직인 유저의 닉네임과 변경된 위치 반환
-        writer.println(user.getNickname()+" "+user.getPoint());
-        writer.flush();
+        broadCast(user.getNickname()+" "+user.getPoint());
         //남은 의자 좌석수 확인
         if(!isSeatNum()){
-            writer.println("FINISH ROUND");
-            writer.flush();
+            broadCast("--------------Finish Round--------------");
             finishRound();
+            try{
+                Thread.sleep(3000);
+            }catch(InterruptedException e){
+                e.printStackTrace();
+            }
         }
     }
 
@@ -260,10 +269,12 @@ public class ServerThread extends Thread {
 
     //유저가 이동한 위치가 의자인지 확인
     private void checkSeat(Account user){
-        seats.stream().filter(s-> s.equals(user.getPoint())).forEach(s -> {
-            seats.remove(s);
-            user.setSeated(true);
-        });
+        for(Point p : seats){
+            if(p.equals(user.getPoint())){
+                seats.remove(p);
+                user.setSeated(true);
+            }
+        }
     }
 
     private boolean isSeatNum(){
@@ -274,28 +285,39 @@ public class ServerThread extends Thread {
         if(account.isLife() && !account.isSeated()){
             account.setLife(false);
             userLifes.decrementAndGet();
-            writer.println("Fail user: "+account.getNickname());
-            writer.flush();
+            broadCast("Fail user: "+account.getNickname());
         }
         //마지막 턴에서 이긴 유저는 클라이언트에서 winner 출력해주기
         if(userLifes.get()==1){
-            writer.println("Winner: "+account.getNickname());
-            writer.flush();
+            broadCast("Winner: "+account.getNickname());
         }
+
 
     }
 
-    private void nextRound(String msg){
-        //Life가 있는 유저인지 확인
-        if(account.isLife()){
-            Account user = playUser.get(msg);
-            user.setSeated(false);
-            user.setPoint(randomUserLocation());
-
-            writer.println(user.getNickname()+" "+user.getPoint());
-            writer.println("seat: "+ randomSeatLocation());
-            writer.flush();
+    private void nextRound(){
+        broadCast("After 3 seconds, Next Round");
+        try{
+            Thread.sleep(3000);
+        }catch(InterruptedException e){
+            e.printStackTrace();
         }
+        broadCast("--------------Next Round--------------");
+
+        for(Account user : playUser.values()){
+            //Life가 있는 유저인지 확인
+            if(account.isLife()){
+                user.setSeated(false);
+                user.setPoint(randomUserLocation());
+
+                broadCast(user.getNickname()+" "+user.getPoint());
+            }
+        }
+
+        for(int i=0; i<userLifes.get()-1; i++){
+            broadCast("seat: "+ randomSeatLocation());
+        }
+
 
     }
 
@@ -312,8 +334,7 @@ public class ServerThread extends Thread {
         for(Account user : playUser.values()){
             if(!user.isHost() && !user.getNickname().equals(prevHostNick)){
                 user.setHost(true);
-                writer.println("New host: "+user.getNickname());
-                writer.flush();
+                broadCast("New host: "+user.getNickname());
             }
         }
 
@@ -321,13 +342,22 @@ public class ServerThread extends Thread {
 
     private void exit(){
         if(account.isHost())    changeHost();
-        writer.println("Exit user: "+account.getNickname());
+        broadCast("Exit user: "+account.getNickname());
+        broadCast("현재 인원("+playUser.size()+"/4)");
         playUser.remove(account.getNickname());
         try {
             socket.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void broadCast(String msg){
+        playUser.values().forEach(user -> {
+            PrintWriter writer = user.getWriter();
+            writer.println(msg);
+            writer.flush();
+        });
     }
 
 }

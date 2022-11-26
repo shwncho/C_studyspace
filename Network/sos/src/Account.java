@@ -1,6 +1,9 @@
+import java.io.PrintWriter;
+
 public class Account {
     private String nickname;
     private String password;
+    private PrintWriter writer;
     //가장 먼저 로그인해서 방에 입장할 때 정해짐
     private boolean host;
 
@@ -61,5 +64,13 @@ public class Account {
 
     public void setLife(boolean life) {
         this.life = life;
+    }
+
+    public PrintWriter getWriter() {
+        return writer;
+    }
+
+    public void setWriter(PrintWriter writer) {
+        this.writer = writer;
     }
 }
