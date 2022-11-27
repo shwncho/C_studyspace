@@ -282,11 +282,14 @@ public class ServerThread extends Thread {
     }
 
     private void finishRound(){
-        if(account.isLife() && !account.isSeated()){
-            account.setLife(false);
-            userLifes.decrementAndGet();
-            broadCast("Fail user: "+account.getNickname());
+        for(Account user : playUser.values()){
+            if(user.isLife() && !user.isSeated()){
+                user.setLife(false);
+                userLifes.decrementAndGet();
+                broadCast("Fail user: "+user.getNickname());
+            }
         }
+
         //마지막 턴에서 이긴 유저는 클라이언트에서 winner 출력해주기
         if(userLifes.get()==1){
             broadCast("Winner: "+account.getNickname());
