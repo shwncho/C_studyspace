@@ -51,7 +51,6 @@ public class ServerThread extends Thread {
 				if ((msg = reader.readLine()) != null) {
 					st = new StringTokenizer(msg, "#");
 					num = st.nextToken();
-					System.out.println(msg);
 					switch (num) {
 						case "1":
 							// 회원가입
@@ -65,8 +64,7 @@ public class ServerThread extends Thread {
 							break;
 						case "3":
 							// 게임시작
-							msg = st.nextToken();
-							startGame(msg);
+							startGame();
 							break;
 						case "4":
 							if (st.hasMoreTokens()) {
@@ -160,21 +158,8 @@ public class ServerThread extends Thread {
 		}
 	}
 
-	private void startGame(String id) {
+	private void startGame() {
 
-
-		String prevHostNick = "";
-		for (Account user : playUser.values()) {
-			if (user.isHost()) {
-				prevHostNick = user.getNickname();
-			}
-		}
-		if(!prevHostNick.equals(id)) {
-			broadCast("3011#"+id);
-			return;
-		}
-		seats.clear();
-		killed.clear();
 		round = 1;
 		if (playUser.size() < 1) {
 			writer.println("4004#error");
@@ -255,11 +240,7 @@ public class ServerThread extends Thread {
 		Account user = playUser.get(nickname);
 		Point userPoint = user.getPoint();
 
-		for (String a : killed) {
-			broadCast("3009#" + a);
-		}
-		if (killed.contains(nickname)) {
-		} else if (key.equalsIgnoreCase("W")) {
+		if (key.equalsIgnoreCase("W")) {
 			moveW(user, userPoint);
 		} else if (key.equalsIgnoreCase("A")) {
 			moveA(user, userPoint);
@@ -315,18 +296,13 @@ public class ServerThread extends Thread {
 	// 유저가 이동한 위치가 의자인지 확인
 	private void checkSeat(Account user) {
 
-		int cnt = 0;
 		for (Iterator<Point> itr = seats.iterator(); itr.hasNext();) {
 
 			Point tmp = itr.next();
-			System.out.println(tmp);
 			if (tmp.equals(user.getPoint())) {
-				System.out.println("user finds seat " + user.getPoint());
 				user.setSeated(true);
 				itr.remove();
 				seats.remove(tmp);
-				cnt++;
-
 			}
 
 		}
@@ -357,6 +333,7 @@ public class ServerThread extends Thread {
 			broadCast("3008#GameEnd");
 		} else {
 			nextRound();
+
 		}
 
 	}
@@ -380,7 +357,6 @@ public class ServerThread extends Thread {
 			}
 		}
 		round++;
-		System.out.println(round);
 		if (round == 2) {
 			broadCast("3005#" + randomSeatLocation().toString() + "#" + "3");
 			broadCast("3005#" + randomSeatLocation().toString() + "#" + "2");

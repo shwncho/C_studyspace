@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Server{
     public static void main(String[] args) throws Exception{
         ServerSocket serverSocket;
-        //유저명 + 유저의 격자판 위치
         Map<String,Account> playUser = new HashMap<>();
         Map<String,Account> userDB = new HashMap<>();
         ArrayList<Point> seats=new ArrayList<>();
